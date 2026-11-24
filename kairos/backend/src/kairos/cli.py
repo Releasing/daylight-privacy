@@ -95,6 +95,8 @@ def cmd_serve(args) -> None:
         return LiveAdapter(urest, fp.get("order_path", s.kalshi.order_path) if fp else s.kalshi.order_path, authorized)
 
     engine.load_accounts(live_factory)
+    from .api.push import Notifier
+    engine.notifier = Notifier(store, Path(s.data_dir) / "secrets" / "vapid_private.pem", s.public_origin)
     app = create_app(engine, vault, dev=args.dev)
 
     @app.on_event("startup")
@@ -261,6 +263,15 @@ def cmd_status(args) -> None:
                       "rules_templates": store.kv_get("verified_rules_templates")}, indent=1, default=str))
 
 
+def cmd_vapid(args) -> None:
+    from .api.push import generate_vapid
+
+    s, store, _ = _setup()
+    pub = generate_vapid(Path(s.data_dir) / "secrets")
+    store.kv_set("vapid_public_key", pub)
+    print("VAPID key pair created; public key stored for the PWA.")
+
+
 def cmd_storage(args) -> None:
     """Apply the 60/70/80/90 % pressure policy (p.41) — run from a systemd timer."""
     from .storage.recorder import disk_status, pressure, prune_raw
@@ -307,6 +318,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--validation-report", default="docs/VALIDATION_REPORT.md")
     p.set_defaults(fn=cmd_authorize_live)
     sub.add_parser("status").set_defaults(fn=cmd_status)
+    sub.add_parser("vapid-keys").set_defaults(fn=cmd_vapid)
     sub.add_parser("research").set_defaults(fn=lambda a: __import__("kairos.research.job", fromlist=["main"]).main())
     p = sub.add_parser("storage-maintain")
     p.set_defaults(fn=cmd_storage)

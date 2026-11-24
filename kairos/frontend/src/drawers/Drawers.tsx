@@ -116,6 +116,14 @@ export function ResearchDrawer() {
   );
 }
 
+function b64u(s: string): Uint8Array {
+  const pad = "=".repeat((4 - (s.length % 4)) % 4);
+  const raw = atob((s + pad).replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+}
+
+const NOTIFY: [string, string][] = [["halts", "Halts and risk events"], ["fills", "Fills"], ["settlements", "Settlements"], ["mode_changes", "Mode changes"], ["profit_allocations", "Profit allocations"]];
+
 export function SettingsDrawer({ onLogout }: { onLogout: () => void }) {
   const a = useStore((s) => s.account);
   const [st, setSt] = useState<any>(null);
@@ -136,7 +144,7 @@ export function SettingsDrawer({ onLogout }: { onLogout: () => void }) {
       const perm = await Notification.requestPermission();
       if (perm !== "granted") return setMsg("Notification permission not granted.");
       const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: st.push_public_key });
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(st.push_public_key) });
       const j = sub.toJSON();
       await api("/api/push/subscribe", { body: { endpoint: j.endpoint, keys: j.keys } });
       setMsg("Push notifications enabled.");
@@ -177,7 +185,14 @@ export function SettingsDrawer({ onLogout }: { onLogout: () => void }) {
         <label className="flex min-h-[44px] items-center justify-between"><span className="text-[13px]">Let the bot manage my manual positions</span>
           <input type="checkbox" className="h-5 w-5" checked={!!st?.bot_manages_manual} onChange={(e) => call("/api/settings/bot-manual", { enabled: e.target.checked }).then(() => api("/api/settings").then(setSt))} /></label>
       </Card>
-      <Card title="Notifications" className="px-3 pb-3"><Btn tone="ghost" onClick={enablePush}>Enable push notifications</Btn></Card>
+      <Card title="Notifications" className="px-3 pb-3">
+        {NOTIFY.map(([k, label]) => (
+          <label key={k} className="flex min-h-[44px] items-center justify-between"><span className="text-[13px]">{label}</span>
+            <input type="checkbox" className="h-5 w-5" checked={!!(st?.notifications || {})[k] || (k === "halts" && (st?.notifications || {})[k] === undefined)}
+              onChange={(e) => { const prefs = { halts: true, ...(st?.notifications || {}), [k]: e.target.checked }; api("/api/settings/notifications", { body: prefs }).then(() => setSt({ ...st, notifications: prefs })); }} /></label>
+        ))}
+        <Btn tone="ghost" onClick={enablePush}>Enable push on this device</Btn>
+      </Card>
       <Card title="Security" className="space-y-2 px-3 pb-3">
         <div className="text-2xs text-muted">Sensitive changes require re-authentication (password + authenticator code).</div>
         <input type="password" autoComplete="current-password" value={reauth.password} onChange={(e) => setReauth({ ...reauth, password: e.target.value })} placeholder="Password" className="h-10 w-full rounded-lg border border-line bg-surface2 px-2" />

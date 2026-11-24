@@ -25,3 +25,12 @@ def test_job_insufficient_then_trains(tmp_path):
     assert "insufficient" in small["status"]
     rep = run(tmp_path / "f", sets, reg)
     assert len(rep["trained"]) == 2 and all(not t["gates_passed"] for t in rep["trained"])  # never auto-promoted
+
+
+def test_vapid_and_notifier_summary(tmp_path):
+    from kairos.api.push import Notifier, generate_vapid
+    pub = generate_vapid(tmp_path)
+    assert len(pub) > 80 and (tmp_path / "vapid_private.pem").stat().st_mode & 0o077 == 0
+    n = Notifier(None, tmp_path / "vapid_private.pem", "https://usekairos.net")
+    assert n.enabled and n.summary("halt", {"code": "feed_stale"})[1].startswith("feed_stale")
+    assert "balance" not in str(n.summary("fill", {"action": "buy", "qty": "3", "side": "yes", "price": "0.41", "paper": True}))

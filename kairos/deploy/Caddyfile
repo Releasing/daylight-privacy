@@ -1,0 +1,32 @@
+# usekairos.net — private application, same-origin API + authenticated WebSocket (spec p.115, p.141–142).
+# Automatic HTTPS (free ACME certificate, auto-renewal). No extra subdomains, no public landing page.
+usekairos.net {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy same-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy "default-src 'self'; connect-src 'self' wss://usekairos.net; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		-Server
+	}
+	@api path /api/*
+	handle @api {
+		reverse_proxy 127.0.0.1:8000 {
+			header_up X-Forwarded-For {remote_host}
+		}
+	}
+	handle {
+		root * /opt/kairos-v11/current/web
+		@static path /assets/*
+		header @static Cache-Control "public, max-age=31536000, immutable"
+		@shell path /sw.js /index.html /manifest.webmanifest
+		header @shell Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+}
+www.usekairos.net {
+	redir https://usekairos.net{uri} permanent
+}

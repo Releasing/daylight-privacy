@@ -79,7 +79,10 @@ class Engine:
         self.started = time.time()
         self.market.subscribe(self._on_market_event)
         self.server_time_offset = 0.0
-        self.fixture_label: str | None = None  # set only by the offline layout-test harness
+        self.fixture_label: str | None = None
+        self.notifier = None  # api.push.Notifier (optional)
+        self._halt_seen: dict[int, set[str]] = {}
+        self._mode_seen: dict[int, str] = {}  # set only by the offline layout-test harness
 
     def load_accounts(self, live_adapter_factory=None) -> None:
         for u in self.store.users():
@@ -88,12 +91,29 @@ class Engine:
     def add_account(self, u: dict, live_adapter_factory=None) -> TradingAccount:
         paper = self.s.is_paper or self.store.live_authorization(u["id"]) is None
         acct = TradingAccount(user_id=u["id"], settings=self.s, store=self.store, paper=paper,
-                              bot_manages_manual=bool(u.get("bot_manages_manual")), publish=self.hub.publish,
+                              bot_manages_manual=bool(u.get("bot_manages_manual")), publish=self.publish,
                               live_adapter=None if paper or live_adapter_factory is None else live_adapter_factory(u["id"]),
                               latency=self.market.latency)
         acct.restore(D(u["paper_start_equity"]))
         self.accounts[u["id"]] = acct
         return acct
+
+    async def publish(self, user_id: int | None, kind: str, data) -> None:
+        await self.hub.publish(user_id, kind, data)
+        if self.notifier is not None and user_id is not None:
+            asyncio.ensure_future(self.notifier.notify(user_id, kind, data))
+
+    async def _notify_state_changes(self) -> None:
+        """Halts and mode transitions are reported with reason codes (p.75); informational only."""
+        for uid, a in self.accounts.items():
+            codes = set(a.halts.codes())
+            for c in codes - self._halt_seen.get(uid, set()):
+                await self.publish(uid, "halt", {"code": c})
+            self._halt_seen[uid] = codes
+            m = a.mode.current.name
+            if self._mode_seen.get(uid) not in (None, m):
+                await self.publish(uid, "mode", {"from": self._mode_seen[uid], "to": m})
+            self._mode_seen[uid] = m
 
     async def _on_market_event(self, kind: str, data: dict) -> None:
         if kind == "settlement":
@@ -113,6 +133,7 @@ class Engine:
                 except Exception:
                     log.exception("account %s evaluation failed", a.user_id)
                     a.halts.trigger("write_failure", time.time(), "evaluation exception")
+        await self._notify_state_changes()
         if self.market.active is not None:
             self.store.upsert_window(self.market.active.ticker, v.clock.open_ts if v.clock else 0, v.clock.close_ts if v.clock else 0,
                                      self.market.active.strike, analyzed=True)

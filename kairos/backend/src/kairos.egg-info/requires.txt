@@ -10,7 +10,8 @@ pyarrow==18.1.0
 polars==1.12.0
 sqlalchemy==2.0.58
 psycopg[binary]==3.2.13
-cryptography==43.0.3
+cryptography<51,>=43.0.3
+pywebpush==2.0.1
 pydantic==2.9.2
 pyotp==2.9.0
 argon2-cffi==23.1.0
