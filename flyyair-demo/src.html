@@ -293,7 +293,7 @@ nav ul a.hot:before{content:"";display:inline-block;width:6px;height:6px;border-
 .door img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5;transition:opacity .3s,transform .6s}
 .door:hover img{opacity:.7;transform:scale(1.04)}
 .door:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,#000d)}
-.door>*:not(img){position:relative;z-index:1}
+.door>*:not(img):not(video){position:relative;z-index:1}
 .door h3{font-family:var(--display);font-weight:400;font-size:36px;text-transform:uppercase;line-height:1}
 .door p{color:#cfcfc9;font-size:14px;margin-top:6px}
 .door.g{border-color:#4a0d16}
@@ -370,6 +370,18 @@ h2:after{content:"";display:block;width:92px;height:11px;margin-top:14px;backgro
 .meter{height:8px;border-radius:4px;background:#1c1c1c;overflow:hidden;margin:14px 0 16px}
 .meter i{display:block;height:100%;background:var(--green);transition:width .2s,background .2s}
 @media(max-width:760px){.camber{grid-template-columns:1fr}}
+
+/* ---------- video ---------- */
+video{display:block;max-width:100%;background:#000}
+.door video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.62;transition:opacity .3s}
+.door:hover video{opacity:.85}
+.door>video{z-index:0!important}
+.phead video{border-radius:20px;border:1px solid var(--line);width:100%;max-height:520px;object-fit:cover}
+.bay{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.bay figure{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);aspect-ratio:3/4}
+.bay video{width:100%;height:100%;object-fit:cover}
+.bay figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 12px;background:linear-gradient(transparent,#000c);font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.02em}
+@media(max-width:700px){.bay{grid-template-columns:1fr 1fr}.bay figure:last-child{display:none}}
 </style>
 </head>
 <body>
@@ -494,7 +506,7 @@ h2:after{content:"";display:block;width:92px;height:11px;margin-top:14px;backgro
 <section><div class="wrap">
   <div class="doors">
     <a class="door reveal" href="#/suspension"><img data-img="strut" alt=""><span class="eyebrow">FlyyAir suspension</span><h3>Bag your car</h3><p>Our own struts and kits, from $1,675. Free shipping.</p></a>
-    <a class="door reveal" href="#/performance"><img data-img="racks15" alt=""><span class="eyebrow">Performance</span><h3>Alignment for lowered cars</h3><p>In-ground rack. No limit on how low.</p></a>
+    <a class="door reveal" href="#/performance"><video data-vid="gtr" data-img="v_gtr" muted loop playsinline preload="none" ></video><span class="eyebrow">Performance</span><h3>Alignment for lowered cars</h3><p>In-ground rack. No limit on how low.</p></a>
     <a class="door g reveal" href="#/giveaway"><img data-img="m3roof" alt=""><span class="eyebrow">Live now</span><h3>Enter the giveaway</h3><p>One tap to enter. Ticket numbers sent instantly.</p></a>
   </div>
 </div></section>
@@ -546,7 +558,7 @@ h2:after{content:"";display:block;width:92px;height:11px;margin-top:14px;backgro
     <h2 class="reveal">The rack is <em>in the floor.</em></h2>
     <p class="lead reveal">Most shops turn slammed cars away because the ramps tear up bumpers and lips. Our alignment rack sits in the ground, so getting on it is damage free and there is no limit on how low your car can be.</p>
     <p class="reveal" style="margin-top:18px"><a class="btn" href="#/appointment">Book an alignment · $25 deposit</a></p></div>
-    <img class="reveal" data-img="rackm3" alt="BMW M3 on the FlyyAir in-ground alignment rack"></div>
+    <video data-vid="s2krack" data-img="v_s2krack" muted loop playsinline preload="none" class="reveal" aria-label="Honda S2000 on the alignment rack"></video></div>
     <div class="rack-grid">
       <div class="rack bad reveal">
         <span class="tag">EVERYWHERE ELSE</span><h3>Drive-on ramps</h3><p>Lip meets ramp. Lip loses.</p>
@@ -579,6 +591,11 @@ h2:after{content:"";display:block;width:92px;height:11px;margin-top:14px;backgro
         <div class="read"><div>CAMBER<b id="camN"></b></div><div style="text-align:right">TYRE ON THE ROAD<b id="camP"></b></div></div>
         <div class="meter"><i id="camM"></i></div>
         <button class="btn" id="camFix">Align it</button> <span class="fine" style="margin-left:10px">Illustration, not a measurement.</span></div>
+    </div>
+    <div class="bay reveal">
+      <figure><video data-vid="sensor" data-img="v_sensor" muted loop playsinline preload="none" ></video><figcaption>Alignment heads on</figcaption></figure>
+      <figure><video data-vid="coilover" data-img="v_coilover" muted loop playsinline preload="none" ></video><figcaption>Coilovers and springs</figcaption></figure>
+      <figure><video data-vid="balancer" data-img="v_balancer" muted loop playsinline preload="none" ></video><figcaption>In the bay</figcaption></figure>
     </div>
     <div class="band reveal" style="margin-top:18px"><img data-img="racks15" alt="Lowered Nissan Silvia on the alignment rack">
       <div><span class="eyebrow">Why it matters</span><h3>Lowered cars need a real alignment.</h3>
@@ -659,7 +676,7 @@ h2:after{content:"";display:block;width:92px;height:11px;margin-top:14px;backgro
   <div class="phead"><div><span class="eyebrow">About us</span><h2>Enthusiasts <em>since 2006.</em></h2>
   <p class="lead">We started with a love of cars in 2006. Over the years we became installers for many well-known brands, then created our own company, FlyyAir Suspensions, dedicated to the upgrades other companies didn't focus on: real customization, and making your car perform better, not just look different.</p>
   <p style="margin-top:18px"><a class="btn" href="#/suspension">Shop air suspension</a></p></div>
-  <img data-img="m3shop" alt="Purple M3 in the FlyyAir shop" style="max-height:460px;object-fit:cover"></div>
+  <video data-vid="install" data-img="v_install" muted loop playsinline preload="none" aria-label="BMW wagon on the lift during an install"></video></div>
 </div></section><section id="builds" style="padding-top:0">
   <div class="wrap">
     <span class="eyebrow reveal">Projects</span>
@@ -822,7 +839,10 @@ render(); requestAnimationFrame(tick);
 
 /* ---------- images ---------- */
 const IMG=/*IMAGES*/;
-$$('[data-img]').forEach(e=>e.tagName==='image'?e.setAttribute('href',IMG[e.dataset.img]):e.src=IMG[e.dataset.img]);
+$$('[data-img]').forEach(e=>e.tagName==='image'?e.setAttribute('href',IMG[e.dataset.img]):e.tagName==='VIDEO'?e.poster=IMG[e.dataset.img]:e.src=IMG[e.dataset.img]);
+const VID=/*VIDEOS*/;
+const vio=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target; if(e.isIntersecting&&!reduce){if(!v.src)v.src=VID[v.dataset.vid]; v.play().catch(()=>{})} else v.pause()}),{threshold:.2});
+$$('video[data-vid]').forEach(v=>vio.observe(v));
 const usd=n=>'$'+n.toLocaleString('en-US');
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
 let cart=0; function addCart(n){cart++;$('#cartN').textContent=cart;toast(n+' added to cart')}
