@@ -9,7 +9,7 @@
 <style>
 :root{
   --bg:#060606; --panel:#0f0f0f; --panel2:#161616; --line:#262626;
-  --ink:#f3f3ef; --mute:#9a9a94; --green:#9bc61a; --green-d:#80a315; --red:#e5372b;
+  --ink:#f3f3ef; --mute:#9a9a94; --green:#e5142d; --green-d:#ce1126; --red:#e5372b; --blue:#2f6bff; --blue-d:#002d62;
   --display:"Anton","Impact","Haettenschweiler","Arial Narrow Bold",sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -25,8 +25,8 @@ h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size
 h2 em{font-style:normal;color:var(--green)}
 .lead{color:var(--mute);max-width:58ch;font-size:17px}
 section{padding:96px 0;position:relative}
-.btn{display:inline-flex;align-items:center;gap:10px;background:var(--green);color:#0a0a0a;font-weight:700;padding:14px 22px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;font-size:13px;transition:transform .15s,background .15s}
-.btn:hover{background:#b4e02a;transform:translateY(-2px)}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--green);color:#fff;font-weight:700;padding:14px 22px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;font-size:13px;transition:transform .15s,background .15s}
+.btn:hover{background:#ff3b52;transform:translateY(-2px)}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .btn.ghost:hover{border-color:var(--green);color:var(--green)}
 
@@ -36,7 +36,7 @@ section{padding:96px 0;position:relative}
 .gauge{position:relative;width:220px;height:220px}
 .gauge svg{width:100%;height:100%;transform:rotate(135deg)}
 .gauge .track{fill:none;stroke:#1c1c1c;stroke-width:10;stroke-linecap:round;stroke-dasharray:424 566}
-.gauge .fill{fill:none;stroke:var(--green);stroke-width:10;stroke-linecap:round;stroke-dasharray:0 566;filter:drop-shadow(0 0 8px rgba(155,198,26,.7))}
+.gauge .fill{fill:none;stroke:var(--green);stroke-width:10;stroke-linecap:round;stroke-dasharray:0 566;filter:drop-shadow(0 0 8px rgba(229,20,45,.7))}
 .gauge .mid{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
 .gauge .word{font-family:var(--display);font-size:34px;letter-spacing:.04em;line-height:1}
 .gauge .word span{color:var(--green)}
@@ -54,12 +54,12 @@ nav .btn{padding:10px 16px;font-size:12px}
 
 /* ---------- hero ---------- */
 #hero{min-height:100svh;padding:0;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
-  background:radial-gradient(1200px 500px at 50% 100%,rgba(155,198,26,.13),transparent 70%),linear-gradient(#0a0a0a,#050505)}
+  background:radial-gradient(900px 420px at 30% 100%,rgba(229,20,45,.20),transparent 70%),radial-gradient(800px 420px at 92% 8%,rgba(47,107,255,.16),transparent 70%),linear-gradient(#0a0a0a,#050505)}
 .hero-title{position:relative;z-index:1;margin-top:68px;text-align:center;white-space:nowrap;font-family:var(--display);text-transform:uppercase;
   font-size:clamp(44px,11.5vw,176px);line-height:.9;letter-spacing:.005em;color:#151515;-webkit-text-stroke:1px #2c2c2c;user-select:none;transition:color .5s,-webkit-text-stroke-color .5s,text-shadow .5s}
 .hero-title b{font-weight:400}
 #hero.slammed .hero-title{color:var(--ink);-webkit-text-stroke-color:transparent}
-#hero.slammed .hero-title b{color:var(--green);text-shadow:0 0 60px rgba(155,198,26,.35)}
+#hero.slammed .hero-title b{color:var(--green);text-shadow:0 0 60px rgba(229,20,45,.35)}
 .hrow{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center;max-width:1280px;width:100%;margin:-.6vw auto 0;padding:0 20px}
 .stage{position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(transparent,#000 14%,#000 86%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-composite:intersect}
 @media(max-width:860px){.hrow{grid-template-columns:1fr;justify-items:center;gap:6px;padding:0;margin-top:0}.rcol{padding:0 20px}}
@@ -130,9 +130,9 @@ nav .btn{padding:10px 16px;font-size:12px}
 .rack h3{font-family:var(--display);font-weight:400;font-size:26px;text-transform:uppercase;letter-spacing:.03em}
 .rack p{color:var(--mute);font-size:14px}
 .rack svg{width:100%;height:auto;margin-top:8px;display:block}
-.rack.bad h3{color:#777}.rack.good{border-color:#33440d;box-shadow:0 0 60px rgba(155,198,26,.08)}
+.rack.bad h3{color:#777}.rack.good{border-color:#16306e;box-shadow:0 0 60px rgba(47,107,255,.12)}
 .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;padding:4px 10px;border-radius:999px;margin-bottom:10px}
-.bad .tag{background:#2a0f0d;color:#ff8178}.good .tag{background:#1b2607;color:var(--green)}
+.bad .tag{background:#1c1c1c;color:#9a9a94}.good .tag{background:#0b1a3d;color:#8fb0ff}
 .carA{animation:hit 4s ease-in-out infinite}
 .carB{animation:roll 4s ease-in-out infinite}
 @keyframes hit{0%{transform:translateX(330px)}38%,44%{transform:translateX(118px)}41%{transform:translateX(121px) translateY(-2px)}47%,80%{transform:translateX(120px)}100%{transform:translateX(330px)}}
@@ -155,12 +155,12 @@ nav .btn{padding:10px 16px;font-size:12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);background:#131313;border-radius:999px;padding:9px 14px;font-size:13px;transition:all .12s}
 .chip:hover{border-color:#555}
-.chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:#000;font-weight:600}
+.chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
 .opts{display:grid;gap:8px}
 .opt{display:flex;justify-content:space-between;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:#131313;border-radius:14px;padding:12px 14px;font-size:14px;width:100%}
 .opt small{display:block;color:var(--mute);font-size:12px}
 .opt b{font-family:var(--mono);font-size:13px;white-space:nowrap}
-.opt[aria-pressed=true]{border-color:var(--green);background:#141a08}
+.opt[aria-pressed=true]{border-color:var(--green);background:#1c0a0d}
 .opt[aria-pressed=true] b{color:var(--green)}
 .sw{width:38px;height:38px;border-radius:50%;border:2px solid #333;outline-offset:3px}
 .sw[aria-pressed=true]{outline:2px solid var(--green)}
@@ -177,7 +177,7 @@ nav .btn{padding:10px 16px;font-size:12px}
 @media(max-width:860px){.builder{grid-template-columns:1fr}.summary{position:static}}
 
 /* ---------- giveaway ---------- */
-#give{background:radial-gradient(900px 400px at 80% 0,rgba(155,198,26,.1),transparent 70%)}
+#give{background:radial-gradient(900px 400px at 80% 0,rgba(229,20,45,.1),transparent 70%)}
 .tabs{display:inline-flex;background:#111;border:1px solid var(--line);border-radius:999px;padding:4px;margin-top:26px}
 .tabs button{padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;color:var(--mute)}
 .tabs button[aria-selected=true]{background:var(--ink);color:#000}
@@ -190,15 +190,15 @@ nav .btn{padding:10px 16px;font-size:12px}
 .count div{background:#000;border:1px solid var(--line);border-radius:12px;padding:10px 0;width:70px;text-align:center;font-family:var(--mono);font-size:26px;font-weight:700}
 .count small{display:block;font-size:9px;letter-spacing:.14em;color:var(--mute);font-weight:500}
 .live{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;color:var(--mute);margin-top:14px}
-.live i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(155,198,26,.7);animation:ping 1.6s infinite}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 0 rgba(47,107,255,.7);animation:ping 1.6s infinite}
 .live b{color:var(--ink)}
-@keyframes ping{to{box-shadow:0 0 0 10px rgba(155,198,26,0)}}
+@keyframes ping{to{box-shadow:0 0 0 10px rgba(47,107,255,0)}}
 .bundles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .bundle{border:1px solid var(--line);background:#131313;border-radius:14px;padding:14px;text-align:left;position:relative}
 .bundle b{font-family:var(--display);font-weight:400;font-size:32px;display:block;line-height:1}
 .bundle small{color:var(--mute);font-size:12px}
-.bundle em{position:absolute;top:10px;right:10px;font-style:normal;font-family:var(--mono);font-size:10px;background:var(--green);color:#000;padding:2px 7px;border-radius:999px}
-.bundle[aria-pressed=true]{border-color:var(--green);background:#141a08}
+.bundle em{position:absolute;top:10px;right:10px;font-style:normal;font-family:var(--mono);font-size:10px;background:var(--green);color:#fff;padding:2px 7px;border-radius:999px}
+.bundle[aria-pressed=true]{border-color:var(--green);background:#1c0a0d}
 .field{width:100%;background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:13px 14px;color:var(--ink);font:inherit;font-size:14px;margin-top:10px}
 .field:focus{outline:2px solid var(--green-d);border-color:transparent}
 .pay{width:100%;margin-top:10px;background:#fff;color:#000;border-radius:12px;height:52px;font-weight:600;font-size:17px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
@@ -207,7 +207,7 @@ nav .btn{padding:10px 16px;font-size:12px}
 .spin{width:22px;height:22px;border-radius:50%;border:3px solid #0003;border-top-color:var(--green-d);animation:rot .6s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
 .ok{text-align:center;padding:26px 10px}
-.ok .tick{width:64px;height:64px;border-radius:50%;background:var(--green);color:#000;display:grid;place-items:center;font-size:32px;margin:0 auto 14px;animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+.ok .tick{width:64px;height:64px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:32px;margin:0 auto 14px;animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
 @keyframes pop{from{transform:scale(0)}}
 .ok h3{font-family:var(--display);font-weight:400;font-size:34px;text-transform:uppercase}
 .tix{font-family:var(--mono);color:var(--green);font-size:18px;margin:8px 0}
@@ -225,8 +225,8 @@ th{position:sticky;top:0;background:#151515;text-align:left;font-family:var(--mo
 td{padding:9px 12px;border-top:1px solid #1c1c1c;white-space:nowrap}
 td.m{font-family:var(--mono);color:var(--green)}
 tr.new td{animation:flash 1.6s}
-tr.win td{background:#1b2607}
-@keyframes flash{from{background:#33440d}}
+tr.win td{background:#2a0c11}
+@keyframes flash{from{background:#4a0d16}}
 .draw{text-align:center}
 .reel{font-family:var(--mono);font-weight:700;font-size:clamp(40px,6vw,64px);letter-spacing:.06em;background:#000;border:1px solid var(--line);border-radius:14px;padding:18px 0;margin:14px 0;color:var(--green)}
 .winner{min-height:56px;font-size:15px;color:var(--mute)}
@@ -268,7 +268,7 @@ nav .logoimg{height:34px;width:auto}
 .nav-r{display:flex;align-items:center;gap:10px}
 .cart{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center}
 .cart svg{width:18px;height:18px;fill:none;stroke:var(--ink);stroke-width:2}
-.cart b{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--green);color:#000;font-size:11px;display:grid;place-items:center;padding:0 4px}
+.cart b{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--green);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 4px}
 nav ul a.on{color:var(--green)}
 nav ul a.hot:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:middle;animation:ping 1.6s infinite}
 .burger{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;place-items:center}
@@ -296,7 +296,7 @@ nav ul a.hot:before{content:"";display:inline-block;width:6px;height:6px;border-
 .door>*:not(img){position:relative;z-index:1}
 .door h3{font-family:var(--display);font-weight:400;font-size:36px;text-transform:uppercase;line-height:1}
 .door p{color:#cfcfc9;font-size:14px;margin-top:6px}
-.door.g{border-color:#33440d}
+.door.g{border-color:#4a0d16}
 @media(max-width:860px){.doors{grid-template-columns:1fr}.door{min-height:240px}}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
 .prod{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,border-color .2s}
@@ -310,7 +310,7 @@ nav ul a.hot:before{content:"";display:inline-block;width:6px;height:6px;border-
 .prod .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:8px}
 .prod .pr{font-family:var(--mono);font-size:13px;color:var(--green)}
 .prod button{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600}
-.prod button:hover:not(:disabled){background:var(--green);border-color:var(--green);color:#000}
+.prod button:hover:not(:disabled){background:var(--green);border-color:var(--green);color:#fff}
 .prod button:disabled{opacity:.4;cursor:default}
 @media(max-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:28px}
@@ -333,7 +333,7 @@ textarea.field{min-height:110px;resize:vertical}
 .faq summary:after{content:"+";color:var(--green);font-family:var(--mono)}
 .faq details[open] summary:after{content:"–"}
 .faq p{color:var(--mute);margin-top:10px;max-width:70ch}
-.toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);background:var(--green);color:#000;font-weight:700;font-size:13px;padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:95;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);background:var(--green);color:#fff;font-weight:700;font-size:13px;padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:95;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .sign{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;width:100%}.sign input{flex:1;min-width:180px;margin:0}
 .gauge .mid img{width:150px}
@@ -342,6 +342,34 @@ textarea.field{min-height:110px;resize:vertical}
 .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 72%;opacity:.92}.tile:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#000c)}.tile>*:not(img){position:relative;z-index:1}
 footer img{height:70px;margin-bottom:22px}
 .flinks{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:var(--mute)}.flinks a:hover{color:var(--green)}
+
+/* ---------- flag stripe, scroll gauge, page wipe, filmstrip, camber ---------- */
+body:before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:linear-gradient(90deg,var(--blue-d) 0 33.3%,#fff 33.3% 66.6%,var(--green-d) 66.6%)}
+h2:after{content:"";display:block;width:92px;height:11px;margin-top:14px;background:linear-gradient(var(--green) 0 3px,transparent 3px 4px,var(--green) 4px 7px,transparent 7px 8px,var(--green) 8px 11px)}
+#psi{position:fixed;left:16px;bottom:22px;z-index:30;display:flex;align-items:flex-end;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--mute);pointer-events:none}
+#psi .bar{width:4px;height:110px;border-radius:2px;background:#1c1c1c;position:relative;overflow:hidden}
+#psi .bar i{position:absolute;left:0;right:0;bottom:0;background:var(--green);height:0}
+#psi b{display:block;font-size:16px;color:var(--ink);letter-spacing:0}
+@media(max-width:1100px){#psi{display:none}}
+#wipe{position:fixed;inset:0;z-index:70;background:var(--green);display:grid;place-items:center;transform:translateY(101%);pointer-events:none;visibility:hidden}
+#wipe img{width:200px}
+#wipe.go{visibility:visible;animation:wipe .62s cubic-bezier(.7,0,.2,1)}
+@keyframes wipe{0%{transform:translateY(101%)}45%,55%{transform:translateY(0)}100%{transform:translateY(-101%)}}
+.strip{overflow:hidden;padding:6px 0 0}
+.strip div{display:flex;gap:12px;width:max-content;animation:slide 60s linear infinite}
+.strip:hover div{animation-play-state:paused}
+.strip img{height:230px;width:auto;border-radius:14px;border:1px solid var(--line)}
+@media(max-width:760px){.strip img{height:150px}}
+.door,.tile{transform-style:preserve-3d;will-change:transform}
+.camber{display:grid;grid-template-columns:.8fr 1.2fr;gap:24px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;margin-top:18px}
+.camber svg{width:100%;max-width:300px;margin:auto;display:block}
+.camber h3{font-family:var(--display);font-weight:400;font-size:clamp(28px,3.6vw,44px);text-transform:uppercase;line-height:1}
+.camber input[type=range]{width:100%;accent-color:var(--green);margin:18px 0 6px}
+.camber .read{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:13px}
+.camber .read b{font-size:26px;display:block;color:var(--ink)}
+.meter{height:8px;border-radius:4px;background:#1c1c1c;overflow:hidden;margin:14px 0 16px}
+.meter i{display:block;height:100%;background:var(--green);transition:width .2s,background .2s}
+@media(max-width:760px){.camber{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -372,7 +400,7 @@ footer img{height:70px;margin-bottom:22px}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <linearGradient id="paint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2b2b"/><stop offset=".45" stop-color="#141414"/><stop offset="1" stop-color="#090909"/></linearGradient>
-    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20301a"/><stop offset="1" stop-color="#050705"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a2030"/><stop offset="1" stop-color="#050705"/></linearGradient>
     <radialGradient id="rim"><stop offset=".55" stop-color="#3a3a3a"/><stop offset="1" stop-color="#9a9a9a"/></radialGradient>
     <g id="wheel">
       <circle r="62" fill="#070707"/><circle r="61" fill="none" stroke="#1d1d1d" stroke-width="2"/>
@@ -380,16 +408,16 @@ footer img{height:70px;margin-bottom:22px}
       <g stroke="#8d8d8d" stroke-width="7" stroke-linecap="round">
         <path d="M0-38V38M-38 0H38M-27-27 27 27M-27 27 27-27"/>
       </g>
-      <circle r="10" fill="#9bc61a"/><circle r="4" fill="#0a0a0a"/>
+      <circle r="10" fill="#e5142d"/><circle r="4" fill="#0a0a0a"/>
     </g>
     <g id="carWheels"><use href="#wheel" transform="translate(235 250) scale(.806)"/><use href="#wheel" transform="translate(765 250) scale(.806)"/></g>
     <g id="carBody">
       <path fill="url(#paint)" stroke="#3b3b3b" stroke-width="1.5" d="M70 262 L60 236 Q58 200 90 186 Q200 158 330 148 L432 96 Q530 76 644 90 L790 140 L900 148 Q942 152 947 190 L950 240 L936 262 L813.4 262 A58 58 0 1 0 716.6 262 L283.4 262 A58 58 0 1 0 186.6 262 Z"/>
       <path fill="url(#glass)" d="M352 146 L438 104 Q530 88 634 100 L760 142 Z"/>
       <path stroke="#0a0a0a" stroke-width="6" d="M548 92 L556 146"/>
-      <path fill="none" stroke="#9bc61a" stroke-width="2" opacity=".85" d="M90 186 Q200 158 330 148 L432 96 Q530 76 644 90 L790 140 L900 148"/>
+      <path fill="none" stroke="#e5142d" stroke-width="2" opacity=".85" d="M90 186 Q200 158 330 148 L432 96 Q530 76 644 90 L790 140 L900 148"/>
       <path fill="none" stroke="#262626" stroke-width="1.5" d="M342 152 L338 258 M556 148 L560 258 M342 152 L770 146"/>
-      <path fill="#eaffb0" d="M66 204 L112 190 L108 200 L68 214 Z"/>
+      <path fill="#ffffff" d="M66 204 L112 190 L108 200 L68 214 Z"/>
       <path fill="#e5372b" d="M945 184 L902 164 L904 174 L947 196 Z"/>
       <rect x="283" y="254" width="434" height="8" fill="#1f1f1f"/>
       <rect x="430" y="180" width="34" height="5" rx="2.5" fill="#333"/><rect x="620" y="178" width="34" height="5" rx="2.5" fill="#333"/>
@@ -466,11 +494,12 @@ footer img{height:70px;margin-bottom:22px}
 <section><div class="wrap">
   <div class="doors">
     <a class="door reveal" href="#/suspension"><img data-img="strut" alt=""><span class="eyebrow">FlyyAir suspension</span><h3>Bag your car</h3><p>Our own struts and kits, from $1,675. Free shipping.</p></a>
-    <a class="door reveal" href="#/performance"><img data-img="rack" alt=""><span class="eyebrow">Performance</span><h3>Alignment for lowered cars</h3><p>In-ground rack. No limit on how low.</p></a>
+    <a class="door reveal" href="#/performance"><img data-img="racks15" alt=""><span class="eyebrow">Performance</span><h3>Alignment for lowered cars</h3><p>In-ground rack. No limit on how low.</p></a>
     <a class="door g reveal" href="#/giveaway"><img data-img="m3roof" alt=""><span class="eyebrow">Live now</span><h3>Enter the giveaway</h3><p>One tap to enter. Ticket numbers sent instantly.</p></a>
   </div>
 </div></section>
-<section style="padding-top:0"><div class="wrap">
+<div class="strip" aria-hidden="true"><div id="strip"></div></div>
+<section><div class="wrap">
   <div class="bar" style="margin-top:0"><div><span class="eyebrow">Shop</span><h2 style="margin-bottom:0">Fresh in the <em>shop.</em></h2></div><a class="btn ghost" href="#/shop">See everything</a></div>
   <div class="grid" id="featured"></div>
 </div></section>
@@ -517,7 +546,7 @@ footer img{height:70px;margin-bottom:22px}
     <h2 class="reveal">The rack is <em>in the floor.</em></h2>
     <p class="lead reveal">Most shops turn slammed cars away because the ramps tear up bumpers and lips. Our alignment rack sits in the ground, so getting on it is damage free and there is no limit on how low your car can be.</p>
     <p class="reveal" style="margin-top:18px"><a class="btn" href="#/appointment">Book an alignment · $25 deposit</a></p></div>
-    <img class="reveal" data-img="rack" alt="Car on the FlyyAir in-ground alignment rack"></div>
+    <img class="reveal" data-img="rackm3" alt="BMW M3 on the FlyyAir in-ground alignment rack"></div>
     <div class="rack-grid">
       <div class="rack bad reveal">
         <span class="tag">EVERYWHERE ELSE</span><h3>Drive-on ramps</h3><p>Lip meets ramp. Lip loses.</p>
@@ -525,20 +554,33 @@ footer img{height:70px;margin-bottom:22px}
           <path d="M0 132 H460" stroke="#333"/>
           <path d="M0 132 L0 104 L96 104 L150 132 Z" fill="#1c1c1c" stroke="#3a3a3a"/>
           <g class="carA"><g transform="scale(.3) translate(0,138)"><use href="#carWheels"/><g transform="translate(0,34)"><use href="#carBody"/></g></g></g>
-          <g class="spark"><path d="M128 118 l-10-12 M134 114 l-2-16 M140 120 l10-12" stroke="#ff8178" stroke-width="2" stroke-linecap="round"/><text x="150" y="40" fill="#ff8178" font-family="monospace" font-size="13" letter-spacing="2">✕ SCRAPES</text></g>
+          <g class="spark"><path d="M128 118 l-10-12 M134 114 l-2-16 M140 120 l10-12" stroke="#9a9a94" stroke-width="2" stroke-linecap="round"/><text x="150" y="40" fill="#9a9a94" font-family="monospace" font-size="13" letter-spacing="2">✕ SCRAPES</text></g>
         </svg>
       </div>
       <div class="rack good reveal">
         <span class="tag">FLYYAIR</span><h3>In-ground rack</h3><p>Roll on. Zero damage.</p>
         <svg viewBox="0 0 460 150">
           <path d="M0 132 H460" stroke="#333"/>
-          <rect x="20" y="132" width="240" height="7" rx="2" fill="#9bc61a"/>
+          <rect x="20" y="132" width="240" height="7" rx="2" fill="#2f6bff"/>
           <g class="carB"><g transform="scale(.3) translate(0,138)"><use href="#carWheels"/><g transform="translate(0,34)"><use href="#carBody"/></g></g></g>
-          <text x="20" y="40" fill="#9bc61a" font-family="monospace" font-size="13" letter-spacing="2">✓ FLUSH WITH THE FLOOR</text>
+          <text x="20" y="40" fill="#8fb0ff" font-family="monospace" font-size="13" letter-spacing="2">✓ FLUSH WITH THE FLOOR</text>
         </svg>
       </div>
     </div>
-    <div class="band reveal" style="margin-top:18px"><img data-img="crv" alt="Lowered Honda CR-V on the alignment rack">
+    <div class="camber reveal">
+      <svg viewBox="0 0 300 240" role="img" aria-label="Front view of a wheel leaning inward">
+        <path d="M20 214H280" stroke="#3a3a3a" stroke-width="2"/><path d="M150 20V214" stroke="#333" stroke-dasharray="5 6"/>
+        <g id="camWheel"><rect x="112" y="38" width="76" height="176" rx="20" fill="#111" stroke="#444" stroke-width="2"/><rect x="134" y="70" width="32" height="112" rx="8" fill="#8d8d8d"/><path d="M122 60V192M178 60V192" stroke="#262626" stroke-width="3"/></g>
+        <rect id="camPatch" x="112" y="216" width="76" height="6" rx="3" fill="#e5142d"/>
+      </svg>
+      <div><span class="eyebrow">Try it</span><h3>Drop the car and the wheels tip in.</h3>
+        <p class="lead" style="font-size:15px;margin-top:8px">Drag the slider to add camber and watch how much tyre is left on the road. Then let us bring it back into spec.</p>
+        <input type="range" id="cam" min="0" max="8" step="0.1" value="6" aria-label="Negative camber in degrees">
+        <div class="read"><div>CAMBER<b id="camN"></b></div><div style="text-align:right">TYRE ON THE ROAD<b id="camP"></b></div></div>
+        <div class="meter"><i id="camM"></i></div>
+        <button class="btn" id="camFix">Align it</button> <span class="fine" style="margin-left:10px">Illustration, not a measurement.</span></div>
+    </div>
+    <div class="band reveal" style="margin-top:18px"><img data-img="racks15" alt="Lowered Nissan Silvia on the alignment rack">
       <div><span class="eyebrow">Why it matters</span><h3>Lowered cars need a real alignment.</h3>
       <p class="lead" style="font-size:15px">Lowering a car changes its camber and toe. Leave it and you chew through tyres and the car wanders. We align lowered and bagged cars every day, on any make or model, and we also handle suspension tuning, fender rolling and brake upgrades.</p>
       <a class="btn ghost" href="tel:+13477848577">Call (347) 784-8577</a></div></div>
@@ -658,7 +700,7 @@ footer img{height:70px;margin-bottom:22px}
     <div class="info"><p><span class="eyebrow">Address</span><br>1542 Ree Ln Unit 1<br>Kissimmee, FL 34741<br><a href="https://www.google.com/maps/search/?api=1&query=1542+Ree+Ln+Unit+1+Kissimmee+FL+34741" target="_blank" rel="noopener">Get directions →</a></p>
       <p><span class="eyebrow">Phone</span><br><a href="tel:+13477848577">(347) 784-8577</a></p>
       <p><span class="eyebrow">Follow</span><br><a href="https://www.instagram.com/papiflyy" target="_blank" rel="noopener">@papiflyy on Instagram</a></p>
-      <img data-img="rack" alt="" style="border-radius:16px;border:1px solid var(--line);margin-top:10px"></div>
+      <img data-img="rackm3" alt="" style="border-radius:16px;border:1px solid var(--line);margin-top:10px"></div>
     <form class="card" data-demo="Thanks for submitting!">
       <label class="l" style="margin-top:0">First name *</label><input class="field" required style="margin-top:6px">
       <label class="l">Last name *</label><input class="field" required style="margin-top:6px">
@@ -695,6 +737,8 @@ footer img{height:70px;margin-bottom:22px}
   <div class="flinks"><a href="#/about">FAQ</a><a href="#/about">Shipping &amp; Returns</a><a href="#/about">Terms &amp; Conditions</a><a href="#/warranty">Warranty submission</a></div>
   <p class="disc">Concept demo prepared by SignalPeak Marketing. Not the live FlyyAir Performance website. Giveaway data, prize and names are sample content; prices are from the current site except where marked as demo.</p>
 </div></footer><div class="toast" id="toast"></div>
+<div id="psi" aria-hidden="true"><div class="bar"><i id="psiBar"></i></div><div><b id="psiN">0</b>PSI</div></div>
+<div id="wipe" aria-hidden="true"><img data-img="logoV" alt=""></div>
 <script>
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -925,23 +969,48 @@ function confetti(){
   if(reduce)return;
   const box=document.createElement('div'); box.id='confBox'; document.body.appendChild(box);
   for(let i=0;i<70;i++){const c=document.createElement('i'); c.className='conf';
-    c.style.cssText=`left:${Math.random()*100}vw;background:${['#9bc61a','#f3f3ef','#80a315','#e5372b'][i%4]};animation-duration:${1.6+Math.random()*1.8}s;animation-delay:${Math.random()*.4}s`;
+    c.style.cssText=`left:${Math.random()*100}vw;background:${['#e5142d','#f3f3ef','#2f6bff','#e5372b'][i%4]};animation-duration:${1.6+Math.random()*1.8}s;animation-delay:${Math.random()*.4}s`;
     box.appendChild(c)}
   setTimeout(()=>box.remove(),4400);
 }
 
 /* ---------- projects ---------- */
-const tiles=[['w t','E63 S Wagon','Aired out in the shop','wagon'],['','G80 M3','Aired out','m3gas'],['','Civic Type R','On FlyyAir','typer'],['w','MDX Type S','On FlyyAir','mdx'],['','TLX','Aired out','tlx'],['','G80 M3','Rooftop','m3roof'],['w','G80 M3','Rear three-quarter','m3rear'],['','FLYY M3','Sunset','m3'],['','G80 M3','Doors open','m3doors']];
+const tiles=[['w t','E63 S Wagon','Aired out in the shop','wagon'],['','G80 M3','Aired out','m3gas'],['','Civic Type R','On FlyyAir','typer'],['w','MDX Type S','On FlyyAir','mdx'],['','TLX','Aired out','tlx'],['','G80 M3','Rooftop','m3roof'],['w','G80 M3','Rear three-quarter','m3rear'],['','FLYY M3','Sunset','m3'],['','G80 M3','Doors open','m3doors'],['w','G80 M3','On the alignment rack','rackm3'],['','S15 Silvia','On the alignment rack','racks15'],['','CR-V','Aligned','crv']];
 $('#tiles').innerHTML=tiles.map(t=>`<a class="tile ${t[0]}" href="#/suspension">${t[3]?`<img src="${IMG[t[3]]}" alt="">`:'<span class="ph">[ Photo / reel from Instagram ]</span>'}<b>${t[1]}</b><small>${t[2]} →</small></a>`).join('');
 
 /* ---------- router ---------- */
+let routed=false;
 function route(){
   let p=(location.hash.match(/^#\/([a-z]*)/)||[])[1]||'home'; if(!$(`.page[data-page="${p}"]`))p='home';
-  $$('.page').forEach(e=>e.classList.toggle('on',e.dataset.page===p));
+  const swap=()=>{$$('.page').forEach(e=>e.classList.toggle('on',e.dataset.page===p)); scrollTo(0,0); psiTick()};
   $$('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===p));
-  $('#menu').classList.remove('open'); scrollTo(0,0);
+  $('#menu').classList.remove('open');
+  if(routed&&!reduce){const w=$('#wipe'); w.classList.remove('go'); void w.offsetWidth; w.classList.add('go'); setTimeout(swap,280); clearTimeout(route.t); route.t=setTimeout(()=>w.classList.remove('go'),700)} else swap();
+  routed=true;
 }
+function psiTick(){const m=document.documentElement.scrollHeight-innerHeight, f=m>0?Math.min(1,scrollY/m):0; $('#psiBar').style.height=f*100+'%'; $('#psiN').textContent=Math.round(f*150)}
+addEventListener('scroll',psiTick,{passive:true});
 addEventListener('hashchange',route); route();
+
+/* ---------- filmstrip ---------- */
+const film=['wagon','m3gas','racks15','typer','mdx','rackm3','tlx','m3roof','m3rear','m3shop'];
+$('#strip').innerHTML=[...film,...film].map(k=>`<img src="${IMG[k]}" alt="" loading="lazy">`).join('');
+
+/* ---------- tilt ---------- */
+if(matchMedia('(hover:hover)').matches&&!reduce){
+  document.addEventListener('pointermove',e=>{const c=e.target.closest('.door,.tile'); if(!c)return; const r=c.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+    c.style.transform=`perspective(900px) rotateY(${(x*7).toFixed(2)}deg) rotateX(${(-y*7).toFixed(2)}deg) translateY(-3px)`});
+  document.addEventListener('pointerout',e=>{const c=e.target.closest('.door,.tile'); if(c&&!c.contains(e.relatedTarget))c.style.transform=''});
+}
+
+/* ---------- camber ---------- */
+function camDraw(){const v=+$('#cam').value, p=Math.max(22,Math.round(100-v*v*1.2));
+  $('#camWheel').setAttribute('transform',`rotate(${v} 150 214)`); $('#camN').textContent='−'+v.toFixed(1)+'°'; $('#camP').textContent=p+'%';
+  const ok=v<=2; $('#camM').style.width=p+'%'; $('#camM').style.background=ok?'var(--blue)':'var(--green)';
+  $('#camPatch').setAttribute('width',76*p/100); $('#camPatch').setAttribute('x',112+76*(1-p/100)); $('#camPatch').setAttribute('fill',ok?'#2f6bff':'#e5142d')}
+$('#cam').oninput=camDraw;
+$('#camFix').onclick=()=>{const t=1.5,c=$('#cam'); let v=+c.value; (function go(){v+=(t-v)*.14; if(Math.abs(v-t)<.05)v=t; c.value=v; camDraw(); if(v!==t)requestAnimationFrame(go)})()};
+camDraw();
 $('#burger').onclick=()=>$('#menu').classList.add('open'); $('#menuX').onclick=()=>$('#menu').classList.remove('open');
 
 /* ---------- reveal ---------- */
