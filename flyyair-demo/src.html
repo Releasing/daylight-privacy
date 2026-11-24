@@ -56,14 +56,16 @@ nav .btn{padding:10px 16px;font-size:12px}
 #hero{min-height:100svh;padding:0;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
   background:radial-gradient(1200px 500px at 50% 100%,rgba(155,198,26,.13),transparent 70%),linear-gradient(#0a0a0a,#050505)}
 .hero-title{position:relative;z-index:1;margin-top:68px;text-align:center;white-space:nowrap;font-family:var(--display);text-transform:uppercase;
-  font-size:clamp(46px,13.6vw,205px);line-height:.9;letter-spacing:.005em;color:#151515;-webkit-text-stroke:1px #2c2c2c;user-select:none;transition:color .5s,-webkit-text-stroke-color .5s,text-shadow .5s}
+  font-size:clamp(44px,11.5vw,176px);line-height:.9;letter-spacing:.005em;color:#151515;-webkit-text-stroke:1px #2c2c2c;user-select:none;transition:color .5s,-webkit-text-stroke-color .5s,text-shadow .5s}
 .hero-title b{font-weight:400}
 #hero.slammed .hero-title{color:var(--ink);-webkit-text-stroke-color:transparent}
 #hero.slammed .hero-title b{color:var(--green);text-shadow:0 0 60px rgba(155,198,26,.35)}
-.stage{position:relative;width:min(1180px,100%);margin:-5.5vw auto 0;z-index:2}
+.hrow{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:30px;align-items:center;max-width:1280px;width:100%;margin:-.6vw auto 0;padding:0 20px}
+.stage{position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(transparent,#000 14%,#000 86%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-composite:intersect}
+@media(max-width:860px){.hrow{grid-template-columns:1fr;justify-items:center;gap:6px;padding:0;margin-top:0}.rcol{padding:0 20px}}
 .stage svg{display:block;width:100%;height:auto;overflow:visible}
 .floor{height:1px;background:linear-gradient(90deg,transparent,#3a3a3a 20%,#3a3a3a 80%,transparent)}
-.hero-bar{position:relative;z-index:3;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding:4px 20px 14px;max-width:1200px;margin:0 auto;width:100%}
+.hero-bar{position:relative;z-index:3;display:grid;grid-template-columns:1fr;gap:24px;align-items:end;padding:10px 20px 26px;max-width:1200px;margin:0 auto;width:100%}
 .hero-copy p{color:var(--mute);max-width:46ch;margin:8px 0 18px}
 .hero-copy .row{display:flex;gap:10px;flex-wrap:wrap}
 /* controller: handheld-style remote */
@@ -114,7 +116,7 @@ nav .btn{padding:10px 16px;font-size:12px}
 .r-lbl{display:grid;grid-template-columns:1fr .9fr .9fr 1fr;gap:7px;margin-top:4px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:#8d8b90;text-align:center}
 .hint{display:block;text-align:center;margin-bottom:8px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--green);text-transform:uppercase;animation:bob 1.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(5px)}}
-@media(max-width:860px){.hero-bar{grid-template-columns:1fr;justify-items:center;text-align:center}.hero-copy .row{justify-content:center}.hero-copy p{margin-inline:auto}.hero-bar>div:last-child{order:-1}}
+@media(max-width:860px){.hero-bar{grid-template-columns:1fr;justify-items:center;text-align:center}.hero-copy .row{justify-content:center}.hero-copy p{margin-inline:auto}}
 
 /* ---------- marquee ---------- */
 .marq{border-block:1px solid var(--line);overflow:hidden;background:#0a0a0a;padding:14px 0}
@@ -235,7 +237,7 @@ tr.win td{background:#1b2607}
 @media(max-width:860px){.give,.own-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
 
 /* ---------- builds ---------- */
-.builds{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:190px;gap:10px;margin-top:36px}
+.builds{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:240px;gap:10px;margin-top:36px}
 .tile{border-radius:16px;border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;
   background:repeating-linear-gradient(135deg,#121212 0 14px,#0e0e0e 14px 28px);transition:transform .25s,border-color .25s}
 .tile:hover{transform:scale(1.02);border-color:var(--green)}
@@ -294,7 +296,7 @@ nav ul a.hot:before{content:"";display:inline-block;width:6px;height:6px;border-
 .door>*:not(img){position:relative;z-index:1}
 .door h3{font-family:var(--display);font-weight:400;font-size:36px;text-transform:uppercase;line-height:1}
 .door p{color:#cfcfc9;font-size:14px;margin-top:6px}
-.door.g{background:radial-gradient(400px 260px at 70% 20%,rgba(155,198,26,.35),#0d0d0d 70%)}
+.door.g{border-color:#33440d}
 @media(max-width:860px){.doors{grid-template-columns:1fr}.door{min-height:240px}}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
 .prod{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,border-color .2s}
@@ -337,7 +339,7 @@ textarea.field{min-height:110px;resize:vertical}
 .gauge .mid img{width:150px}
 .r-logo img{height:20px}
 .prize{position:relative;overflow:hidden}.prize img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}.prize:after{content:"";position:absolute;inset:0;background:linear-gradient(#0006,#000e)}.prize>*:not(img){position:relative;z-index:1}
-.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6}.tile:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,#000d)}.tile>*:not(img){position:relative;z-index:1}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 72%;opacity:.92}.tile:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#000c)}.tile>*:not(img){position:relative;z-index:1}
 footer img{height:70px;margin-bottom:22px}
 .flinks{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:var(--mute)}.flinks a:hover{color:var(--green)}
 </style>
@@ -399,23 +401,17 @@ footer img{height:70px;margin-bottom:22px}
 <main class="page" data-page="home">
 <section id="hero">
   <div class="hero-title" aria-hidden="true">Static <b>is dead</b></div>
-  <div class="stage">
-    <svg viewBox="0 60 1000 250" role="img" aria-label="Side view of a car that lowers when you press the air out controls">
-      <ellipse id="shadow" cx="500" cy="302" rx="430" ry="10" fill="#000" opacity=".55"/>
-      <ellipse id="glow" cx="500" cy="300" rx="380" ry="5" fill="#9bc61a" opacity="0" style="filter:blur(10px)"/>
-      <use href="#carWheels"/>
-      <g id="body"><use href="#carBody"/></g>
-    </svg>
-    <div class="floor"></div>
-  </div>
-  <div class="hero-bar">
-    <div class="hero-copy">
-      <span class="eyebrow">Kissimmee, FL · Air suspension &amp; alignment</span>
-      <h1 style="font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(30px,4vw,48px);line-height:1;margin-top:8px">Built for cars that sit on the ground.</h1>
-      <p>FlyyAir air suspension, installed in-house, aligned on an in-ground rack with no limit on how low you are.</p>
-      <div class="row"><a class="btn" href="#/suspension">Find my kit</a><a class="btn ghost" href="#/giveaway">Enter the giveaway</a></div>
+  <div class="hrow">
+    <div class="stage">
+      <svg viewBox="0 352 1320 548" role="img" aria-label="Bagged white wagon in the FlyyAir shop. Use the controller to raise and lower it.">
+        <defs><clipPath id="cpB"><path d="M1201 726 1200 725 1200 719 1197 714 1196 697 1193 690 1190 686 1190 683 1187 676 1188 656 1187 655 1187 647 1185 644 1185 622 1184 621 1175 621 1161 607 1157 607 1147 596 1134 584 1125 572 1119 567 1106 552 1104 548 1104 540 1106 538 1106 535 1105 534 1101 534 1097 528 1095 527 1090 527 1085 525 1080 525 1071 522 1056 521 1052 519 1040 519 1039 518 1032 518 1031 517 1024 517 1023 516 1016 516 1015 515 1008 515 1007 514 1000 514 999 513 987 513 986 512 962 511 961 510 928 509 927 508 916 508 915 507 911 507 908 509 900 509 899 508 880 508 879 507 848 507 847 506 834 506 833 505 816 505 815 504 804 504 799 498 795 498 791 503 768 504 767 505 753 505 752 506 752 510 750 512 744 512 743 513 720 513 719 514 704 514 703 515 677 516 675 514 675 512 674 511 671 511 668 507 656 507 650 509 645 509 643 511 643 514 641 516 624 519 623 520 623 523 620 526 617 526 607 530 604 530 595 534 584 534 582 532 573 531 566 535 554 535 510 558 507 561 502 563 501 566 497 570 491 570 488 572 488 587 484 591 478 591 473 594 470 599 464 599 462 601 460 601 458 603 454 604 449 608 445 610 442 610 433 615 419 616 413 613 409 609 409 601 408 600 390 601 389 602 378 602 377 603 358 603 357 604 332 605 331 606 312 607 311 608 298 609 297 610 291 610 290 611 284 611 283 612 275 612 274 613 261 614 255 616 248 616 239 619 232 619 231 620 200 627 197 629 194 629 191 631 187 631 173 637 168 638 159 643 148 647 145 650 143 650 137 654 133 655 130 658 128 658 125 664 123 666 120 666 117 670 117 672 113 676 110 677 106 684 107 727 112 741 112 750 113 751 122 751 124 753 124 760 122 762 116 762 115 765 112 768 105 771 105 781 106 782 108 802 109 804 113 807 115 807 118 809 127 810 128 811 174 813 175 812 175 779 176 778 177 764 181 750 190 731 195 724 209 710 216 705 232 697 246 693 252 693 253 692 284 692 285 693 289 693 311 700 313 702 315 702 325 708 345 727 358 749 365 771 365 776 367 783 367 792 368 793 368 805 369 806 404 806 407 808 591 808 592 807 679 807 680 806 735 806 736 805 758 805 760 807 760 810 761 811 871 810 875 798 876 772 877 771 877 767 879 764 879 759 881 756 881 753 887 740 887 738 895 725 907 712 917 704 929 698 937 696 940 694 965 687 987 687 988 688 997 689 1008 693 1019 699 1038 717 1049 732 1057 751 1057 754 1060 763 1060 768 1061 769 1061 795 1062 796 1071 796 1078 793 1083 793 1096 789 1102 789 1105 787 1111 787 1123 783 1132 782 1136 780 1149 777 1155 774 1162 773 1176 766 1178 766 1180 764 1197 765 1200 758Z"/></clipPath><clipPath id="cpW"><path d="M196 724 188 736 188 738 184 745 180 757 180 760 178 765 178 770 177 771 177 785 179 791 188 807 205 824 218 832 323 832 334 825 352 807 361 791 364 782 364 771 358 752 353 741 343 726 330 713 315 703 313 703 297 696 285 694 284 693 253 693 252 694 246 694 245 695 235 697 216 706 209 711ZM907 713 896 725 890 734 887 741 884 751 884 777 889 792 897 805 912 820 919 825 933 832 1014 832 1033 821 1049 805 1055 796 1060 784 1060 769 1059 768 1057 755 1053 743 1048 732 1042 723 1024 704 1016 698 1003 692 993 689 988 689 987 688 965 688 964 689 952 691 940 695 937 697 929 699 917 705Z"/></clipPath><filter id="soft"><feGaussianBlur stdDeviation="1.3"/></filter></defs>
+        <image data-img="wagon" width="1320" height="1040"/>
+        <path d="M1199 728 1198 721 1195 716 1194 699 1185 678 1186 658 1185 649 1183 646 1183 624 1173 623 1159 609 1155 609 1132 586 1104 554 1102 550 1103 536 1099 536 1095 530 1050 521 1038 521 973 513 913 509 910 511 802 506 797 500 793 505 755 507 752 514 675 518 673 514 669 513 666 509 647 511 643 518 626 521 622 528 597 536 582 536 575 533 568 537 556 537 504 565 499 572 491 573 490 589 486 593 480 593 475 596 472 601 466 601 435 617 417 618 411 615 407 611 406 602 334 607 234 621 202 629 170 640 130 660 127 666 121 669 119 674 112 679 108 686 109 725 114 739 114 748 124 749 126 751 126 762 124 764 118 764 114 770 108 772 107 779 110 800 115 805 130 809 172 811 173 777 178 776 181 789 190 805 207 822 220 830 321 830 332 823 350 805 359 789 363 774 368 775 371 804 406 804 409 806 589 806 760 803 763 809 869 808 873 796 874 770 881 745 885 740 885 736 890 735 891 740 889 741 886 753 887 779 891 790 899 803 914 818 935 830 1012 830 1031 819 1047 803 1058 782 1063 783 1063 793 1069 794 1076 791 1141 777 1165 769 1178 762 1195 763 1198 756Z" fill="#0c0c0d" filter="url(#soft)"/>
+        <image data-img="wagon" width="1320" height="1040" clip-path="url(#cpW)"/>
+        <g id="body"><image data-img="wagon" width="1320" height="1040" clip-path="url(#cpB)"/></g>
+      </svg>
     </div>
-    <div>
+    <div class="rcol">
       <span class="hint" id="hint">Hold ◀ to air out</span>
       <div class="remote" id="remote" aria-label="Air suspension controller">
         <!-- his logo replaces this wordmark -->
@@ -457,13 +453,21 @@ footer img{height:70px;margin-bottom:22px}
       </div>
     </div>
   </div>
+  <div class="hero-bar">
+    <div class="hero-copy">
+      <span class="eyebrow">Kissimmee, FL · Air suspension &amp; alignment</span>
+      <h1 style="font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(30px,4vw,48px);line-height:1;margin-top:8px">Built for cars that sit on the ground.</h1>
+      <p>FlyyAir air suspension, installed in-house, aligned on an in-ground rack with no limit on how low you are.</p>
+      <div class="row"><a class="btn" href="#/suspension">Find my kit</a><a class="btn ghost" href="#/giveaway">Enter the giveaway</a></div>
+    </div>
+  </div>
 </section>
 <div class="marq" aria-hidden="true"><div id="marq"></div></div>
 <section><div class="wrap">
   <div class="doors">
     <a class="door reveal" href="#/suspension"><img data-img="strut" alt=""><span class="eyebrow">FlyyAir suspension</span><h3>Bag your car</h3><p>Our own struts and kits, from $1,675. Free shipping.</p></a>
     <a class="door reveal" href="#/performance"><img data-img="rack" alt=""><span class="eyebrow">Performance</span><h3>Alignment for lowered cars</h3><p>In-ground rack. No limit on how low.</p></a>
-    <a class="door g reveal" href="#/giveaway"><span class="eyebrow">Live now</span><h3>Enter the giveaway</h3><p>One tap to enter. Ticket numbers sent instantly.</p></a>
+    <a class="door g reveal" href="#/giveaway"><img data-img="m3roof" alt=""><span class="eyebrow">Live now</span><h3>Enter the giveaway</h3><p>One tap to enter. Ticket numbers sent instantly.</p></a>
   </div>
 </div></section>
 <section style="padding-top:0"><div class="wrap">
@@ -563,7 +567,7 @@ footer img{height:70px;margin-bottom:22px}
 
     <div class="give buyer" id="buyer">
       <div class="prize">
-        <img data-img="redcar" alt=""><span class="ph">Prize photo or reel goes here</span>
+        <img data-img="m3rear" alt=""><span class="ph">Sample prize image</span>
         <div>
           <span class="eyebrow">Sample prize</span>
           <h3>Full FlyyAir kit<br>+ install</h3>
@@ -613,7 +617,7 @@ footer img{height:70px;margin-bottom:22px}
   <div class="phead"><div><span class="eyebrow">About us</span><h2>Enthusiasts <em>since 2006.</em></h2>
   <p class="lead">We started with a love of cars in 2006. Over the years we became installers for many well-known brands, then created our own company, FlyyAir Suspensions, dedicated to the upgrades other companies didn't focus on: real customization, and making your car perform better, not just look different.</p>
   <p style="margin-top:18px"><a class="btn" href="#/suspension">Shop air suspension</a></p></div>
-  <img data-img="install" alt="Car on the lift at the FlyyAir shop" style="max-height:420px;object-fit:cover"></div>
+  <img data-img="m3shop" alt="Purple M3 in the FlyyAir shop" style="max-height:460px;object-fit:cover"></div>
 </div></section><section id="builds" style="padding-top:0">
   <div class="wrap">
     <span class="eyebrow reveal">Projects</span>
@@ -698,7 +702,7 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 /* ---------- air ride ---------- */
 const MIN=-10, MAX=36;
 const air={f:0,r:0,tf:0,tr:0};
-const body=$('#body'), hero=$('#hero'), shadow=$('#shadow'), glow=$('#glow');
+const body=$('#body'), hero=$('#hero'), LIFT=22/36;
 let held=null, sel='a', tank=150, actx=null, hiss=null, soundOn=true;
 const remote=$('#remote'), rscreen=$('#rscreen');
 function psi(d){return Math.max(0,Math.round(40*(1-d/MAX)))}
@@ -708,15 +712,12 @@ function modeName(){
   return d>MAX-2?'Aired Out':d<-6?'Lift':Math.abs(d)<2?'Low Cruise':'Custom';
 }
 function render(){
-  const dy=(air.f+air.r)/2, ang=Math.atan((air.r-air.f)/530)*180/Math.PI;
-  body.setAttribute('transform',`translate(0 ${dy.toFixed(2)}) rotate(${ang.toFixed(3)} 500 262)`);
+  const dy=(air.f+air.r)/2, lf=(MAX-air.f)*LIFT, lr=(MAX-air.r)*LIFT, ang=Math.atan((lf-lr)/703)*180/Math.PI;
+  body.setAttribute('transform',`translate(0 ${(-(lf+lr)/2).toFixed(2)}) rotate(${ang.toFixed(3)} 621 800)`);
   for(const k of ['f','r']){const v=psi(air[k]);
     $$(`[data-psi=${k}]`).forEach(e=>e.textContent=v); $$(`[data-bar=${k}]`).forEach(e=>e.style.height=Math.min(100,v/55*100)+'%')}
   $('#rmode').textContent=modeName(); $('#tankN').textContent=Math.round(tank);
   $$('[data-preset]').forEach(b=>b.classList.toggle('on',Math.abs(air.tf-b.dataset.preset)<1&&Math.abs(air.tr-b.dataset.preset)<1));
-  const low=Math.max(0,dy)/MAX;
-  shadow.setAttribute('opacity',(.45+low*.45).toFixed(2));
-  glow.setAttribute('opacity',(low*.55).toFixed(2));
   hero.classList.toggle('slammed',dy>MAX-3);
 }
 function tick(){
@@ -777,7 +778,7 @@ render(); requestAnimationFrame(tick);
 
 /* ---------- images ---------- */
 const IMG=/*IMAGES*/;
-$$('[data-img]').forEach(e=>e.src=IMG[e.dataset.img]);
+$$('[data-img]').forEach(e=>e.tagName==='image'?e.setAttribute('href',IMG[e.dataset.img]):e.src=IMG[e.dataset.img]);
 const usd=n=>'$'+n.toLocaleString('en-US');
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
 let cart=0; function addCart(n){cart++;$('#cartN').textContent=cart;toast(n+' added to cart')}
@@ -930,7 +931,7 @@ function confetti(){
 }
 
 /* ---------- projects ---------- */
-const tiles=[['w t','FLYY M3','Full kit · dual compressor','m3'],['','Type S','Lowered on FlyyAir','redcar'],['','CR-V','Aligned on the in-ground rack','crv'],['w','Shop days','Install bay','install'],['','7 Series','On the rack','rack'],['','Your car','Book the same install','']];
+const tiles=[['w t','E63 S Wagon','Aired out in the shop','wagon'],['','G80 M3','Aired out','m3gas'],['','Civic Type R','On FlyyAir','typer'],['w','MDX Type S','On FlyyAir','mdx'],['','TLX','Aired out','tlx'],['','G80 M3','Rooftop','m3roof'],['w','G80 M3','Rear three-quarter','m3rear'],['','FLYY M3','Sunset','m3'],['','G80 M3','Doors open','m3doors']];
 $('#tiles').innerHTML=tiles.map(t=>`<a class="tile ${t[0]}" href="#/suspension">${t[3]?`<img src="${IMG[t[3]]}" alt="">`:'<span class="ph">[ Photo / reel from Instagram ]</span>'}<b>${t[1]}</b><small>${t[2]} →</small></a>`).join('');
 
 /* ---------- router ---------- */
