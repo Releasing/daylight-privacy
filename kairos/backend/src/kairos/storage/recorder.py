@@ -163,3 +163,31 @@ def prune_raw(root: Path, retention_hours: int, now: float, protect: set[str] | 
             shutil.rmtree(d)
             removed.append(day)
     return removed
+
+
+@dataclass
+class FeatureRecorder:
+    """One-second derived feature rows for research (p.6 derived schema). Zstd Parquet by UTC date."""
+
+    root: Path
+    flush_rows: int = 600
+    rows: list[dict] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.root = Path(self.root)
+
+    def add(self, row: dict) -> None:
+        self.rows.append(row)
+        if len(self.rows) >= self.flush_rows:
+            self.flush()
+
+    def flush(self) -> None:
+        if not self.rows:
+            return
+        rows, self.rows = self.rows, []
+        day = datetime.fromtimestamp(rows[0]["ts"], timezone.utc).strftime("%Y-%m-%d")
+        d = self.root / f"date={day}"
+        d.mkdir(parents=True, exist_ok=True)
+        tmp = d / f"part-{int(time.time() * 1000)}.parquet.tmp"
+        pq.write_table(pa.Table.from_pylist(rows), tmp, compression="zstd")
+        os.replace(tmp, tmp.with_suffix(""))

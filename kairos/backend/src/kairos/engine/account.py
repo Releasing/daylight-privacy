@@ -56,6 +56,7 @@ class TradingAccount:
     bot_manages_manual: bool = False
     publish: Any = None  # async callable(user_id, kind, data)
     live_adapter: LiveAdapter | None = None
+    latency: Any = None  # shared LatencyStats
     ledger: Ledger = field(default_factory=Ledger)
     funds: FundsAccount = field(default_factory=FundsAccount)
     cash: Decimal = ZERO  # reconciled cash (paper: internally reconciled ledger cash)
@@ -195,6 +196,21 @@ class TradingAccount:
 
     async def evaluate(self, v: MarketView) -> None:
         async with self._lock:
+            self._t0 = time.perf_counter()
+            self._decision_recorded = False
+            try:
+                await self._evaluate(v)
+            finally:
+                self._record_decision_latency()
+
+    def _record_decision_latency(self) -> None:
+        """Local decision time (event → order intent), excluding simulated/real exchange latency (p.91)."""
+        if not self._decision_recorded and self.latency is not None:
+            self.latency.add("decision_ms", (time.perf_counter() - self._t0) * 1000.0)
+            self._decision_recorded = True
+
+    async def _evaluate(self, v: MarketView) -> None:
+        if True:
             self.paper_exchange.fees = v.fees
             self._auto_halts(v)
             st = self.account_state(v.now)
@@ -242,6 +258,7 @@ class TradingAccount:
                     self.gate.release(key)
                     self._decide(v, c, "skip", 0, ["arbitrage_two_leg_execution_research_only"], mode)
                     continue
+                self._record_decision_latency()
                 await self._submit_entry(v, c, ap.qty, ap.all_in, key, mode)
                 break  # one entry per evaluation; next evaluation recomputes with fresh evidence
 

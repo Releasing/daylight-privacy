@@ -110,11 +110,12 @@ export function MarketChart({ mode, tf, height }: { mode: ChartMode; tf: string;
           if (prefs.zones) { addLine(s.candles, l.lower, "rgba(255,101,125,0.35)", "", LineStyle.Dotted); addLine(s.candles, l.upper, "rgba(255,101,125,0.35)", "", LineStyle.Dotted); }
         });
       }
-      const pm: SeriesMarker<Time>[] = prefs.patterns ? (chartData.patterns || []).filter((p: any) => p.at).map((p: any) => ({
+      const SHORT: Record<string, string> = { support_bounce: "bounce", resistance_rejection: "reject", breakout: "BO", breakdown: "BD", retest: "retest", false_breakout: "false BO" };
+      const pm: SeriesMarker<Time>[] = prefs.patterns ? (chartData.patterns || []).filter((p: any) => p.at).slice(-6).map((p: any) => ({
         time: (Math.floor(p.at / ((TF_MIN[tf] || 1) * 60)) * (TF_MIN[tf] || 1) * 60) as UTCTimestamp,
         position: p.kind.includes("break") && !p.kind.includes("down") ? "aboveBar" : "belowBar",
         color: p.kind === "false_breakout" ? C.amber : p.kind.includes("bounce") || p.kind === "breakout" ? C.mint : C.coral,
-        shape: "circle", text: p.kind.replace("_", " "),
+        shape: "circle", text: SHORT[p.kind] || p.kind,
       })) : [];
       s.candles.setMarkers(pm.sort((a, b) => (a.time as number) - (b.time as number)));
     } else if (s.bid) {
@@ -152,7 +153,8 @@ export function MarketChart({ mode, tf, height }: { mode: ChartMode; tf: string;
   const lastQuote = market?.quotes;
   const empty = mode === "btc" ? !btcBars.length : !(chartData?.contract || []).length;
   return (
-    <div className="relative h-full w-full" style={height ? { height } : undefined}>
+    <div className="flex h-full w-full flex-col" style={height ? { height } : undefined}>
+      <div className="relative min-h-0 flex-1">
       <div ref={host} className="absolute inset-0" />
       {empty && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center text-center text-[13px] text-muted">
@@ -160,7 +162,8 @@ export function MarketChart({ mode, tf, height }: { mode: ChartMode; tf: string;
             <span className="text-2xs">No values are shown until verified data arrives.</span></div>
         </div>
       )}
-      <div className="pointer-events-none absolute bottom-1 left-2 text-2xs text-muted/90">
+      </div>
+      <div className="truncate px-2 pt-0.5 text-2xs text-muted/90" title={src}>
         {src} · updated {timeOf(market?.server_time)}
         {mode !== "btc" && lastQuote ? ` · last ${cents(lastQuote.last)}` : ""}
         {mode === "btc" && chartData?.strike ? ` · strike ${price(chartData.strike)}` : ""}

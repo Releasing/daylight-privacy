@@ -79,6 +79,7 @@ class Engine:
         self.started = time.time()
         self.market.subscribe(self._on_market_event)
         self.server_time_offset = 0.0
+        self.fixture_label: str | None = None  # set only by the offline layout-test harness
 
     def load_accounts(self, live_adapter_factory=None) -> None:
         for u in self.store.users():
@@ -88,7 +89,8 @@ class Engine:
         paper = self.s.is_paper or self.store.live_authorization(u["id"]) is None
         acct = TradingAccount(user_id=u["id"], settings=self.s, store=self.store, paper=paper,
                               bot_manages_manual=bool(u.get("bot_manages_manual")), publish=self.hub.publish,
-                              live_adapter=None if paper or live_adapter_factory is None else live_adapter_factory(u["id"]))
+                              live_adapter=None if paper or live_adapter_factory is None else live_adapter_factory(u["id"]),
+                              latency=self.market.latency)
         acct.restore(D(u["paper_start_equity"]))
         self.accounts[u["id"]] = acct
         return acct
@@ -104,7 +106,7 @@ class Engine:
 
     async def evaluate_all(self) -> None:
         v = self.market.view()
-        with self.market.latency.measure("lane_fast"):
+        with self.market.latency.measure("evaluation_cycle_ms"):
             for a in list(self.accounts.values()):
                 try:
                     await a.evaluate(v)

@@ -65,6 +65,8 @@ def cmd_serve(args) -> None:
     ws_factory = (lambda on_msg: KalshiWS(s.kalshi.ws_url, signer, on_msg)) if signer else None
     recorder = Recorder(Path(s.data_dir) / "market") if not args.no_record else None
     market = MarketService(s, store, recorder, rest, ws_factory)
+    from .storage.recorder import FeatureRecorder
+    market.feature_recorder = FeatureRecorder(Path(s.data_dir) / "features")
     engine = Engine(s, store, market)
 
     def live_factory(uid: int):
@@ -259,6 +261,21 @@ def cmd_status(args) -> None:
                       "rules_templates": store.kv_get("verified_rules_templates")}, indent=1, default=str))
 
 
+def cmd_storage(args) -> None:
+    """Apply the 60/70/80/90 % pressure policy (p.41) — run from a systemd timer."""
+    from .storage.recorder import disk_status, pressure, prune_raw
+
+    s, store, _ = _setup()
+    total, free = disk_status(s.data_dir)
+    act = pressure(total, free, None)
+    removed = []
+    if act.level in ("rotate", "prune", "pause_ml", "halt_entry"):
+        hours = s.storage.raw_retention_hours if act.level == "rotate" else 24
+        removed = prune_raw(Path(s.data_dir) / "market", hours, time.time())
+    store.kv_set("storage_pressure", {"level": act.level, "usage": act.usage, "removed": removed, "ts": time.time()})
+    print(json.dumps({"level": act.level, "usage": round(act.usage, 4), "removed_days": removed}))
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="kairos")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -290,6 +307,9 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--validation-report", default="docs/VALIDATION_REPORT.md")
     p.set_defaults(fn=cmd_authorize_live)
     sub.add_parser("status").set_defaults(fn=cmd_status)
+    sub.add_parser("research").set_defaults(fn=lambda a: __import__("kairos.research.job", fromlist=["main"]).main())
+    p = sub.add_parser("storage-maintain")
+    p.set_defaults(fn=cmd_storage)
     args = ap.parse_args(argv)
     args.fn(args)
 

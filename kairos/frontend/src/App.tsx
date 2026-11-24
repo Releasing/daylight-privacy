@@ -28,7 +28,7 @@ function Connection() {
   const conn = useStore((s) => s.connected);
   const st = useStore((s) => s);
   const age = dataAgeMs(st);
-  const p95 = st.market?.latency?.lane_fast?.p95;
+  const p95 = st.market?.latency?.decision_ms?.p95;
   const stale = conn !== "live" || (age !== null && age > 5000);
   const label = conn === "live" ? (stale ? "STALE" : "LIVE") : conn === "offline" ? "OFFLINE" : "RECONNECTING";
   return (
@@ -56,7 +56,7 @@ function Header({ tab, setTab, mobile, open }: { tab: Tab; setTab: (t: Tab) => v
           </nav>
         )}
         <div className="ml-auto flex items-center gap-2">
-          <Pill tone={a?.paper === false ? "coral" : "blue"}>{a?.paper === false ? "LIVE MODE" : "PAPER MODE"}</Pill>
+          <Pill tone={a?.paper === false ? "coral" : "blue"}>{a?.paper === false ? "LIVE" : "PAPER"}<span className="hidden sm:inline">&nbsp;MODE</span></Pill>
           <Connection />
           <button onClick={() => open("notifications")} aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-lg border border-line text-muted hover:text-text"><KIcon name="bell" /></button>
           <button onClick={() => open("settings")} aria-label="Settings" className="grid h-10 w-10 place-items-center rounded-lg border border-line text-muted hover:text-text"><KIcon name="settings" /></button>
@@ -103,6 +103,12 @@ function Login({ onDone }: { onDone: () => void }) {
   );
 }
 
+function FixtureBanner() {
+  const label = useStore((s) => s.system?.fixture_label);
+  if (!label) return null;
+  return <div role="alert" className="bg-amber px-3 py-1 text-center text-[12px] font-bold text-midnight">{label}</div>;
+}
+
 export default function App() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [tab, setTab] = useState<Tab>(() => (location.hash.slice(1) as Tab) || "markets");
@@ -122,6 +128,7 @@ export default function App() {
   return (
     <div className={`flex flex-col ${mobile ? "min-h-full pb-[72px]" : "h-[100dvh] overflow-hidden"}`}>
       <Header tab={tab} setTab={setTab} mobile={mobile} open={setDrawer} />
+      <FixtureBanner />
       <main className={`min-h-0 flex-1 ${mobile ? "" : "overflow-hidden"}`}>
         {tab === "markets" && (mobile ? <MarketsMobile openDrawer={setDrawer} /> : <MarketsDesktop openDrawer={setDrawer} />)}
         {tab === "trade" && <TradeView mobile={mobile} />}

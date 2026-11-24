@@ -81,6 +81,7 @@ class MarketService:
         self.recorder = recorder
         self.rest = rest
         self.ws_factory = ws_factory  # callable(on_message) → KalshiWS, or None (REST polling fallback)
+        self.feature_recorder = None  # storage.recorder.FeatureRecorder (set by the server)
         self.ws = None
         self.series = settings.kalshi.series_ticker
         self.books: dict[str, OrderBook] = {}
@@ -490,6 +491,23 @@ class MarketService:
         if self.mtf.roll(now):
             self.version += 1
         self.record_contract_point(now)
+        if self.feature_recorder is not None and self.active is not None:
+            try:
+                v = self.view(now)
+                f = v.features
+                if v.estimate is not None and v.estimate.valid and v.clock is not None:
+                    z = None
+                    if v.spot and v.sigma_log_per_s and v.meta and v.meta.strike is not None:
+                        left = max(v.clock.close_ts - now - 40.0, 1.0)
+                        z = (v.spot - float(v.meta.strike)) / (v.spot * v.sigma_log_per_s * left ** 0.5)
+                    self.feature_recorder.add({"ts": now, "ticker": self.active.ticker, "seconds_left": v.clock.close_ts - now,
+                                               "z_to_strike": z, "sigma": v.sigma_log_per_s, "ret_60s": f.get("ret_60s"),
+                                               "ret_300s": f.get("ret_300s"), "flow_imb_15s": f.get("flow_imb_15s"),
+                                               "k_spread": f.get("k_spread"), "k_depth_imb": f.get("k_depth_imb"),
+                                               "eth_corr": f.get("eth_corr"), "sol_corr": f.get("sol_corr"),
+                                               "p_model": v.estimate.p_yes, "spot_proxy": v.spot})
+            except Exception:
+                log.exception("feature record failed")
         cb = getattr(self, "coinbase", None)
         kr = getattr(self, "kraken", None)
         self.feed_status["coinbase"] = "ok" if cb and cb.connected else ("off" if cb is None else "reconnecting")

@@ -72,7 +72,7 @@ export function DecisionPanel({ onExpand }: { onExpand?: () => void }) {
         <div className="mt-2 grid grid-cols-3 gap-2">
           <MiniStat label="Net edge (cons.)" value={best ? cents(best.ev_per_contract, 1) : DASH} tone={tone(best?.ev_per_contract)} />
           <MiniStat label="Confidence" value={best?.confidence == null ? DASH : `${Number(best.confidence).toFixed(1)}`} sub="evidence, not prob." />
-          <MiniStat label="Latency p95" value={m?.latency?.lane_fast?.p95 != null ? `${m.latency.lane_fast.p95.toFixed(0)} ms` : DASH} />
+          <MiniStat label="Decision p95" value={m?.latency?.decision_ms?.p95 != null ? `${m.latency.decision_ms.p95.toFixed(1)} ms` : DASH} />
         </div>
         <div className="mt-2 text-[12px]">
           <span className="text-muted">Action: </span>

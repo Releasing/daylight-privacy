@@ -77,7 +77,7 @@ export function Pill({ children, tone = "blue" }: { children: ReactNode; tone?: 
     amber: "text-amber border-amber/40 bg-amber/10", violet: "text-violet border-violet/40 bg-violet/10", cyan: "text-cyan border-cyan/40 bg-cyan/10",
     muted: "text-muted border-line bg-surface2",
   } as const;
-  return <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide ${map[tone]}`}>{children}</span>;
+  return <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-md border px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide ${map[tone]}`}>{children}</span>;
 }
 
 export function Stat({ label, children, sub }: { label: string; children: ReactNode; sub?: ReactNode }) {

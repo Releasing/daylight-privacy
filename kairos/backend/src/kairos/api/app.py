@@ -191,7 +191,7 @@ def create_app(engine: Engine, vault: Vault, dev: bool = False) -> FastAPI:
         return {"policy_version": s.policy_version, "mode_setting": s.mode, "settings_fingerprint": s.fingerprint(),
                 "uptime_s": time.time() - engine.started, "latency": engine.market.latency.summary(),
                 "feeds": engine.market.feed_status, "claude": {"enabled": s.research.claude_enabled, "cap_usd": str(s.research.claude_monthly_cap_usd)},
-                "events": list(engine.market.events)[-20:]}
+                "events": list(engine.market.events)[-20:], "fixture_label": engine.fixture_label}
 
     @app.get("/api/snapshot")
     async def snapshot(ctx: dict = Depends(current)):
