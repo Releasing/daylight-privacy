@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: #080D16;
+  color: #EDF4FF;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+.tnum { font-variant-numeric: tabular-nums; }
+.safe-t { padding-top: var(--safe-t); }
+.safe-b { padding-bottom: var(--safe-b); }
+.safe-x { padding-left: max(12px, var(--safe-l)); padding-right: max(12px, var(--safe-r)); }
+
+@media (pointer: coarse) { .coarse\:min-h-\[44px\] { min-height: 44px; } }
+
+.flash-up { animation: flashUp 450ms ease-out; border-radius: 4px; }
+.flash-down { animation: flashDown 450ms ease-out; border-radius: 4px; }
+@keyframes flashUp { from { background: rgba(56, 217, 169, 0.22); } to { background: transparent; } }
+@keyframes flashDown { from { background: rgba(255, 101, 125, 0.22); } to { background: transparent; } }
+
+.nav-glow { box-shadow: 0 2px 0 0 #32A8FF, 0 6px 16px -10px rgba(50, 168, 255, 0.8); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  .flash-up, .flash-down { animation: none; }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #223249; border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+input, select { color-scheme: dark; }
