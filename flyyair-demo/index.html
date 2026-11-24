@@ -55,7 +55,7 @@ nav .btn{padding:10px 16px;font-size:12px}
 /* ---------- hero ---------- */
 #hero{min-height:100svh;padding:0;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
   background:radial-gradient(1200px 500px at 50% 100%,rgba(155,198,26,.13),transparent 70%),linear-gradient(#0a0a0a,#050505)}
-.hero-title{position:relative;z-index:1;margin-top:84px;text-align:center;white-space:nowrap;font-family:var(--display);text-transform:uppercase;
+.hero-title{position:relative;z-index:1;margin-top:68px;text-align:center;white-space:nowrap;font-family:var(--display);text-transform:uppercase;
   font-size:clamp(46px,13.6vw,205px);line-height:.9;letter-spacing:.005em;color:#151515;-webkit-text-stroke:1px #2c2c2c;user-select:none;transition:color .5s,-webkit-text-stroke-color .5s,text-shadow .5s}
 .hero-title b{font-weight:400}
 #hero.slammed .hero-title{color:var(--ink);-webkit-text-stroke-color:transparent}
@@ -63,32 +63,58 @@ nav .btn{padding:10px 16px;font-size:12px}
 .stage{position:relative;width:min(1180px,100%);margin:-5.5vw auto 0;z-index:2}
 .stage svg{display:block;width:100%;height:auto;overflow:visible}
 .floor{height:1px;background:linear-gradient(90deg,transparent,#3a3a3a 20%,#3a3a3a 80%,transparent)}
-.hero-bar{position:relative;z-index:3;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding:18px 20px 30px;max-width:1200px;margin:0 auto;width:100%}
+.hero-bar{position:relative;z-index:3;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding:4px 20px 14px;max-width:1200px;margin:0 auto;width:100%}
 .hero-copy p{color:var(--mute);max-width:46ch;margin:8px 0 18px}
 .hero-copy .row{display:flex;gap:10px;flex-wrap:wrap}
-/* controller */
-.remote{background:linear-gradient(#171717,#0c0c0c);border:1px solid #2a2a2a;border-radius:22px;padding:14px;width:310px;box-shadow:0 20px 60px #000a,inset 0 1px 0 #333}
-.screen{background:#050805;border:1px solid #1d2a0a;border-radius:12px;padding:10px 12px;font-family:var(--mono);color:var(--green);display:grid;grid-template-columns:1fr auto 1fr;gap:4px 8px;align-items:center}
-.screen .c{font-size:22px;font-weight:700;line-height:1}
-.screen .c small{display:block;font-size:9px;letter-spacing:.14em;color:#6d8a1e;font-weight:500;margin-bottom:3px}
-.screen .c.r{text-align:right}
-.screen .mid{grid-row:span 2;text-align:center;font-size:9px;letter-spacing:.14em;color:#6d8a1e;padding:0 6px}
-.screen .mid b{display:block;font-size:15px;color:var(--green);margin-top:2px}
-.pads{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.pad{background:#1b1b1b;border:1px solid #2e2e2e;border-radius:12px;padding:8px 4px 6px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#8a8a84;user-select:none}
-.pad div{display:flex;gap:6px;justify-content:center;margin-top:6px}
-.pad button{width:36px;height:36px;border-radius:10px;background:#262626;border:1px solid #3a3a3a;font-size:13px;color:var(--ink);touch-action:none;transition:background .1s,transform .1s}
-.pad button:active,.pad button.on{background:var(--green);color:#000;transform:scale(.94)}
-.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
-.presets button{background:#141414;border:1px solid #2e2e2e;border-radius:10px;padding:9px 0;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#cfcfc9}
-.presets button b{display:block;font-size:15px;color:var(--green)}
-.presets button:hover{border-color:var(--green)}
-.remote .foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#777}
-.remote .foot button{color:#aaa;border:1px solid #2e2e2e;border-radius:999px;padding:4px 10px}
-.remote .foot button[aria-pressed=true]{color:var(--green);border-color:var(--green-d)}
+/* controller: handheld-style remote */
+.remote{width:236px;background:linear-gradient(160deg,#3b393e,#252427 42%,#1a191c);border:1px solid #4a484e;border-radius:22px;padding:10px 12px 10px;box-shadow:0 24px 60px #000b,inset 0 1px 0 #5a585e;user-select:none}
+.r-top{position:relative;height:30px;display:grid;place-items:center}
+.r-logo{font-family:var(--display);font-size:21px;letter-spacing:.05em;transform:skewX(-10deg);color:#e9e9e6}
+.r-logo span{color:var(--green)}
+.r-led{position:absolute;right:4px;top:9px;width:10px;height:10px;border-radius:50%;background:#77736c;box-shadow:inset 0 -2px 3px #0008;transition:background .2s,box-shadow .2s}
+.remote.moving .r-led{background:var(--green);box-shadow:0 0 10px var(--green)}
+.r-screen{background:#0a0a0b;border-radius:8px;padding:8px;margin-top:4px;border:1px solid #000}
+.r-head{display:grid;grid-template-columns:22px 1fr 22px;gap:8px;align-items:center}
+.r-head svg{width:18px;height:18px;fill:#bdbdb8;display:block;margin:auto}
+.r-head button[aria-pressed=false] svg{fill:#4a4a4a}
+.r-mode{background:#000;border-radius:999px;text-align:center;font-size:13px;font-weight:600;padding:5px 0;color:#f0f0ee}
+.r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.r-tile{background:#1c1c1e;border-radius:10px;padding:6px 8px 7px;text-align:left;border:1px solid transparent;transition:border-color .15s}
+.r-tile.sel{border-color:var(--green)}
+.r-tile .t{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:#c9c9c5}
+.r-tile .t i,.r-tank i{font-style:normal;font-size:8px;font-weight:700;background:#3a3a3c;color:#d6d6d2;border-radius:999px;padding:1px 6px}
+.r-tile .v{display:flex;align-items:flex-end;gap:7px;margin-top:3px}
+.r-bar{width:6px;height:30px;border-radius:3px;background:#3a3a3c;position:relative;overflow:hidden}
+.r-bar u{position:absolute;left:0;right:0;bottom:0;background:#f0f0ee;border-radius:3px}
+.r-tile b{font-family:var(--display);font-weight:400;font-size:32px;line-height:.95;color:#f0f0ee;min-width:38px}
+.r-tank{display:flex;align-items:center;justify-content:center;gap:8px;background:#1c1c1e;border-radius:10px;padding:5px 0;margin:6px 26px 0}
+.r-tank b{font-family:var(--display);font-weight:400;font-size:22px;line-height:1;color:#f0f0ee}
+.r-tank span{font-size:10px;font-weight:700;color:#c9c9c5;display:grid;gap:2px;justify-items:start}
+.r-list{display:none;gap:6px;margin-top:8px}
+.r-list button{background:#1c1c1e;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:#f0f0ee;border:1px solid transparent}
+.r-list button small{font-family:var(--mono);font-size:10px;color:#8d8d88}
+.r-list button:hover,.r-list button.on{border-color:var(--green)}
+.r-screen[data-view=presets] .r-list{display:grid}
+.r-screen[data-view=presets] .r-tiles,.r-screen[data-view=presets] .r-tank{display:none}
+.r-tip{display:none;font-size:10px;color:#8d8d88;text-align:center;margin-top:6px}
+.r-screen[data-view=manual] .r-tip{display:block}
+.r-screen[data-view=manual] .r-tank{display:none}
+.r-tabs{display:grid;grid-template-columns:repeat(3,1fr);margin-top:8px;padding-top:6px;border-top:1px solid #1d1d1f}
+.r-tabs button{font-size:10px;font-weight:600;color:#77777a;display:grid;justify-items:center;gap:2px}
+.r-tabs svg{width:15px;height:15px;fill:currentColor}
+.r-tabs button[aria-selected=true]{color:#f0f0ee}
+.r-keys{display:grid;grid-template-columns:1fr 1.8fr 1fr;gap:7px;margin-top:10px}
+.r-keys button,.r-mid{height:38px;border-radius:12px;background:linear-gradient(#1b1a1c,#0b0b0c);border:1px solid #000;box-shadow:inset 0 1px 0 #3a383d;display:grid;place-items:center;touch-action:none;transition:transform .08s,filter .08s}
+.r-mid{display:grid;grid-template-columns:1fr 1fr;border-radius:19px;overflow:hidden}
+.r-mid button{border:0;border-radius:0;box-shadow:none;background:none;height:100%;width:100%}
+.r-mid button+button{border-left:1px solid #2c2b2e}
+.r-keys svg{width:20px;height:20px;fill:none;stroke:#f3f3ef;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.r-keys button:active,.r-keys button.on{transform:scale(.94);filter:brightness(1.8)}
+.r-keys button.on svg,.r-keys button:active svg{stroke:var(--green)}
+.r-lbl{display:grid;grid-template-columns:1fr .9fr .9fr 1fr;gap:7px;margin-top:4px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:#8d8b90;text-align:center}
 .hint{display:block;text-align:center;margin-bottom:8px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--green);text-transform:uppercase;animation:bob 1.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(5px)}}
-@media(max-width:860px){.hero-bar{grid-template-columns:1fr;justify-items:center;text-align:center}.hero-copy .row{justify-content:center}.hero-copy p{margin-inline:auto}.remote{width:100%;max-width:340px}}
+@media(max-width:860px){.hero-bar{grid-template-columns:1fr;justify-items:center;text-align:center}.hero-copy .row{justify-content:center}.hero-copy p{margin-inline:auto}.hero-bar>div:last-child{order:-1}}
 
 /* ---------- marquee ---------- */
 .marq{border-block:1px solid var(--line);overflow:hidden;background:#0a0a0a;padding:14px 0}
@@ -301,26 +327,46 @@ footer{border-top:1px solid var(--line);padding:56px 0 30px}
       <p>FlyyAir air suspension, installed in-house, aligned on an in-ground rack with no limit on how low you are.</p>
       <div class="row"><a class="btn" href="#build">Find my kit</a><a class="btn ghost" href="#give">Enter the giveaway</a></div>
     </div>
-    <div class="remote" aria-label="Air suspension controller">
-      <span class="hint" id="hint">Hold ▼ to air out</span>
-      <div class="screen">
-        <div class="c"><small>FRONT L</small><span data-psi="f">85</span></div>
-        <div class="mid">HEIGHT<b id="hgt">4.1"</b></div>
-        <div class="c r"><small>REAR L</small><span data-psi="r">85</span></div>
-        <div class="c"><small>FRONT R</small><span data-psi="f">85</span></div>
-        <div class="c r"><small>REAR R</small><span data-psi="r">85</span></div>
+    <div>
+      <span class="hint" id="hint">Hold ◀ to air out</span>
+      <div class="remote" id="remote" aria-label="Air suspension controller">
+        <!-- his logo replaces this wordmark -->
+        <div class="r-top"><div class="r-logo">FLYY<span>AIR</span></div><i class="r-led"></i></div>
+        <div class="r-screen" id="rscreen" data-view="drive">
+          <div class="r-head">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.5 7.5 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.4zM13 15.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4z"/></svg>
+            <div class="r-mode" id="rmode">Low Cruise</div>
+            <button id="snd" aria-pressed="true" aria-label="Sound" title="Sound on/off"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-6 6v4l-2 3.5h16L18 13V9a6 6 0 0 0-6-6zm-2.2 15.5a2.2 2.2 0 0 0 4.4 0z"/></svg></button>
+          </div>
+          <div class="r-tiles">
+            <button class="r-tile" data-ax="f"><span class="t">LF<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="f"></u></span><b data-psi="f">40</b></span></button>
+            <button class="r-tile" data-ax="f"><span class="t">RF<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="f"></u></span><b data-psi="f">40</b></span></button>
+            <button class="r-tile" data-ax="r"><span class="t">LR<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="r"></u></span><b data-psi="r">40</b></span></button>
+            <button class="r-tile" data-ax="r"><span class="t">RR<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="r"></u></span><b data-psi="r">40</b></span></button>
+          </div>
+          <div class="r-tank"><b id="tankN">150</b><span>TANK<i>PSI</i></span></div>
+          <div class="r-tip">Tap front or rear, then hold ◀ ▶</div>
+          <div class="r-list">
+            <button data-preset="36">Aired Out<small>0 PSI</small></button>
+            <button data-preset="0">Low Cruise<small>40 PSI</small></button>
+            <button data-preset="-10">Lift<small>51 PSI</small></button>
+          </div>
+          <div class="r-tabs" role="tablist">
+            <button role="tab" aria-selected="false" data-view="presets"><svg viewBox="0 0 24 24"><path d="M7 3h10v18l-5-4-5 4z"/></svg>Presets</button>
+            <button role="tab" aria-selected="true" data-view="drive"><svg viewBox="0 0 24 24"><path d="M5 11l1.6-4.6A2 2 0 0 1 8.500 5h7a2 2 0 0 1 1.900 1.400L19 11a2 2 0 0 1 2 2v5h-3v-2H6v2H3v-5a2 2 0 0 1 2-2zm2.200 0h9.600l-1-3H8.200zM7 15.200a1.200 1.200 0 1 0 0-2.400 1.200 1.200 0 0 0 0 2.400zm10 0a1.200 1.200 0 1 0 0-2.400 1.200 1.200 0 0 0 0 2.400z"/></svg>Drive</button>
+            <button role="tab" aria-selected="false" data-view="manual"><svg viewBox="0 0 24 24"><path d="M3 6h10v2H3zm14 0h4v2h-4zM3 11h4v2H3zm8 0h10v2H11zM3 16h12v2H3zm16 0h2v2h-2zM14 4.500h2v5h-2zM8 9.500h2v5H8zm8 5h2v5h-2z"/></svg>Manual</button>
+          </div>
+        </div>
+        <div class="r-keys">
+          <button data-hold="1" aria-label="Lower (hold)"><svg viewBox="0 0 24 24"><path d="M16 5 7 12l9 7"/></svg></button>
+          <div class="r-mid">
+            <button data-preset="36" aria-label="Air out"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></button>
+            <button data-preset="0" aria-label="Drive height"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" style="fill:#f3f3ef"/></svg></button>
+          </div>
+          <button data-hold="-1" aria-label="Raise (hold)"><svg viewBox="0 0 24 24"><path d="M8 5l9 7-9 7"/></svg></button>
+        </div>
+        <div class="r-lbl"><span>DOWN</span><span>AIR OUT</span><span>DRIVE</span><span>UP</span></div>
       </div>
-      <div class="pads">
-        <div class="pad">FRONT<div><button data-hold="f,-1" aria-label="Raise front">▲</button><button data-hold="f,1" aria-label="Lower front">▼</button></div></div>
-        <div class="pad">ALL<div><button data-hold="a,-1" aria-label="Raise all">▲</button><button data-hold="a,1" aria-label="Lower all">▼</button></div></div>
-        <div class="pad">REAR<div><button data-hold="r,-1" aria-label="Raise rear">▲</button><button data-hold="r,1" aria-label="Lower rear">▼</button></div></div>
-      </div>
-      <div class="presets">
-        <button data-preset="36"><b>1</b>AIRED OUT</button>
-        <button data-preset="0"><b>2</b>DRIVE</button>
-        <button data-preset="-10"><b>3</b>LIFT</button>
-      </div>
-      <div class="foot"><span>FLYYAIR · PSI</span><button id="snd" aria-pressed="true">SOUND ON</button></div>
     </div>
   </div>
 </section>
@@ -467,26 +513,36 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const MIN=-10, MAX=36;
 const air={f:0,r:0,tf:0,tr:0};
 const body=$('#body'), hero=$('#hero'), shadow=$('#shadow'), glow=$('#glow');
-let held=null, actx=null, hiss=null, soundOn=true;
-function psi(d){return Math.max(0,Math.round(85-(d/MAX)*85))}
+let held=null, sel='a', tank=150, actx=null, hiss=null, soundOn=true;
+const remote=$('#remote'), rscreen=$('#rscreen');
+function psi(d){return Math.max(0,Math.round(40*(1-d/MAX)))}
+function modeName(){
+  if(rscreen.dataset.view==='manual')return 'Manual';
+  const d=(air.tf+air.tr)/2; if(Math.abs(air.tf-air.tr)>2)return 'Custom';
+  return d>MAX-2?'Aired Out':d<-6?'Lift':Math.abs(d)<2?'Low Cruise':'Custom';
+}
 function render(){
   const dy=(air.f+air.r)/2, ang=Math.atan((air.r-air.f)/530)*180/Math.PI;
   body.setAttribute('transform',`translate(0 ${dy.toFixed(2)}) rotate(${ang.toFixed(3)} 500 262)`);
-  $$('[data-psi=f]').forEach(e=>e.textContent=psi(air.f));
-  $$('[data-psi=r]').forEach(e=>e.textContent=psi(air.r));
-  $('#hgt').textContent=(Math.max(0,(38-dy))/38*4.1).toFixed(1)+'"';
+  for(const k of ['f','r']){const v=psi(air[k]);
+    $$(`[data-psi=${k}]`).forEach(e=>e.textContent=v); $$(`[data-bar=${k}]`).forEach(e=>e.style.height=Math.min(100,v/55*100)+'%')}
+  $('#rmode').textContent=modeName(); $('#tankN').textContent=Math.round(tank);
+  $$('[data-preset]').forEach(b=>b.classList.toggle('on',Math.abs(air.tf-b.dataset.preset)<1&&Math.abs(air.tr-b.dataset.preset)<1));
   const low=Math.max(0,dy)/MAX;
   shadow.setAttribute('opacity',(.45+low*.45).toFixed(2));
   glow.setAttribute('opacity',(low*.55).toFixed(2));
   hero.classList.toggle('slammed',dy>MAX-3);
 }
 function tick(){
-  if(held){const [w,dir]=held, step=dir*.55;
-    if(w!=='r')air.tf=Math.min(MAX,Math.max(MIN,air.tf+step));
-    if(w!=='f')air.tr=Math.min(MAX,Math.max(MIN,air.tr+step));}
-  const mv=Math.abs(air.tf-air.f)+Math.abs(air.tr-air.r);
-  air.f+=(air.tf-air.f)*.12; air.r+=(air.tr-air.r)*.12;
-  if(mv>.02)render();
+  if(held){const step=held*.55;
+    if(sel!=='r')air.tf=Math.min(MAX,Math.max(MIN,air.tf+step));
+    if(sel!=='f')air.tr=Math.min(MAX,Math.max(MIN,air.tr+step));}
+  const df=air.tf-air.f, dr=air.tr-air.r, mv=Math.abs(df)+Math.abs(dr);
+  air.f+=df*.12; air.r+=dr*.12;
+  const up=Math.max(0,-df)+Math.max(0,-dr), t0=tank;
+  tank=Math.max(95,Math.min(150,tank-up*.05+(mv<.6?.12:0)));
+  if(mv>.02||Math.round(t0)!==Math.round(tank))render();
+  remote.classList.toggle('moving',mv>.6);
   if(hiss)hiss.gain.setTargetAtTime(mv>.6&&soundOn?.16:0,actx.currentTime,.05);
   requestAnimationFrame(tick);
 }
@@ -502,15 +558,24 @@ function audio(){
     src.connect(bp).connect(hiss).connect(actx.destination); src.start();
   }catch(e){}
 }
+const hideHint=()=>$('#hint').style.visibility='hidden';
 $$('[data-hold]').forEach(b=>{
-  const [w,dir]=b.dataset.hold.split(',');
-  const on=e=>{e.preventDefault();audio();held=[w,+dir];b.classList.add('on');$('#hint').style.display='none'};
-  const off=()=>{if(held&&b.classList.contains('on'))held=null;b.classList.remove('on')};
+  const on=e=>{e.preventDefault();audio();held=+b.dataset.hold;b.classList.add('on');hideHint()};
+  const off=()=>{if(b.classList.contains('on'))held=null;b.classList.remove('on')};
   b.addEventListener('pointerdown',on); ['pointerup','pointerleave','pointercancel'].forEach(t=>b.addEventListener(t,off));
   b.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')on(e)}); b.addEventListener('keyup',off);
 });
-$$('[data-preset]').forEach(b=>b.onclick=()=>{audio();air.tf=air.tr=+b.dataset.preset;$('#hint').style.display='none'});
-$('#snd').onclick=e=>{soundOn=!soundOn;e.target.setAttribute('aria-pressed',soundOn);e.target.textContent=soundOn?'SOUND ON':'SOUND OFF'};
+$$('[data-preset]').forEach(b=>b.onclick=()=>{audio();air.tf=air.tr=+b.dataset.preset;hideHint();render()});
+function view(v){
+  rscreen.dataset.view=v; $$('.r-tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===v));
+  if(v!=='manual'){sel='a';$$('.r-tile').forEach(t=>t.classList.remove('sel'))}
+  else pickAx('f');
+  render();
+}
+function pickAx(a){sel=a;$$('.r-tile').forEach(t=>t.classList.toggle('sel',t.dataset.ax===a))}
+$$('.r-tabs button').forEach(b=>b.onclick=()=>view(b.dataset.view));
+$$('.r-tile').forEach(t=>t.onclick=()=>{if(rscreen.dataset.view!=='manual')view('manual');pickAx(t.dataset.ax)});
+$('#snd').onclick=e=>{soundOn=!soundOn;e.currentTarget.setAttribute('aria-pressed',soundOn)};
 render(); requestAnimationFrame(tick);
 
 /* ---------- loader ---------- */
