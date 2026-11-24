@@ -74,6 +74,16 @@ class MarketView:
     exchange_open: bool | None
 
 
+def settlement_mismatch(proxy_avg: float | None, strike: float | None, official: str, comparator: str, basis_sd: float,
+                        k: float = 4.0) -> bool:
+    """Computed outcome vs official result (p.2). Only a *clear* disagreement counts: the proxy average must be
+    more than k·basis_sd from the strike, otherwise proxy uncertainty explains the difference."""
+    if proxy_avg is None or strike is None or abs(proxy_avg - strike) <= k * basis_sd:
+        return False
+    computed = "yes" if (proxy_avg >= strike if comparator == ">=" else proxy_avg > strike) else "no"
+    return computed != official
+
+
 class MarketService:
     def __init__(self, settings: Settings, store, recorder: Recorder | None, rest: KalshiREST, ws_factory=None):
         self.s = settings
@@ -343,6 +353,11 @@ class MarketService:
                         self.basis.add(proxy_avg, float(exp_val))
                     except (TypeError, ValueError):
                         pass
+                mismatch = settlement_mismatch(proxy_avg, float(meta.strike) if meta.strike is not None else None, result,
+                                               self.rule.comparator if self.rule else ">=", self.basis.sd)
+                if mismatch:
+                    verified = False
+                    await self.emit("settlement_mismatch", {"ticker": ticker, "result": result, "proxy_avg": proxy_avg})
                 self.store.save_settlement(ticker, result, time.time(), verified, strike=meta.strike, proxy_avg=proxy_avg,
                                            model_p_yes=self.last_p.pop(ticker, None),
                                            expiration_value=str(exp_val) if exp_val not in (None, "") else None)

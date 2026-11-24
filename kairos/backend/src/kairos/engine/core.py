@@ -119,6 +119,9 @@ class Engine:
         if kind == "settlement":
             for a in self.accounts.values():
                 await a.on_settlement(data["ticker"], data["result"])
+        elif kind == "settlement_mismatch":
+            for a in self.accounts.values():
+                a.halts.trigger("settlement_mismatch", time.time(), dumps(data))  # latched: model disabled until review
         elif kind in ("fee_schedule_changed",):
             for a in self.accounts.values():
                 a.halts.trigger("fee_schedule_changed", time.time(), dumps(data))
