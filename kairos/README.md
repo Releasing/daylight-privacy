@@ -29,7 +29,7 @@ kairos/
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e "backend[test]"
-cd backend && pytest -q                      # 100 tests
+cd backend && pytest -q                      # 114 tests
 cd ../frontend && npm ci && npm run build
 # real engine against live Kalshi/Coinbase/Kraken (needs outbound network):
 KAIROS_DATABASE_URL=sqlite:///data/dev.db kairos create-user owner

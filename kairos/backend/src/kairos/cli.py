@@ -81,7 +81,10 @@ def cmd_serve(args) -> None:
         fp = store.kv_get("verified_api_fingerprint")
 
         def authorized():
-            a = store.live_authorization(uid)
+            # Live fill ingestion / exchange reconciliation loop is not yet built and verified against the demo API.
+            # Until it is, live submission is refused unconditionally (fail closed; see VALIDATION_REPORT §2).
+            return False, "live_fill_ingestion_not_implemented"
+            a = store.live_authorization(uid)  # noqa: unreachable — retained for the reviewed future release
             if s.mode != "live":
                 return False, "server_in_paper_mode"
             if a is None:

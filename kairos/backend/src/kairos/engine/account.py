@@ -90,17 +90,32 @@ class TradingAccount:
             self.store.append_ledger(self.user_id, f"u{self.user_id}-paper-deposit-0", "deposit", time.time(), True,
                                      self.settings.policy_version, price=start_equity, bucket_delta={"active": str(start_equity)})
             events = self.store.ledger_for(self.user_id, self.paper)
+        # Replay deposits, fills and settlement markers in one chronological stream so high-water-mark
+        # distributions reproduce the live run exactly (p.70, p.77).
+        stream: list[tuple[float, int, str, dict]] = []
         for e in events:
-            if e["event_type"] == "deposit":
-                amt = D(e["price"])
-                self.funds.deposit(e["event_id"], amt, e["ts"])
-                self.cash += amt
-        for f in self.store.fills_for(self.user_id, self.paper):
-            self._apply_fill_to_books(f["fill_id"], f["ticker"], f["side"], f["action"], D(f["quantity"]), D(f["price"]), D(f["fee"]),
-                                      f["exchange_ts"], f["origin"], f["strategy"], persist=False)
-        for e in events:
-            if e["event_type"] == "settle_marker":
-                self._apply_settlement(e["market_id"], e["bucket_delta"]["result"], e["ts"], persist=False)
+            if e["event_type"] in ("deposit", "settle_marker"):
+                stream.append((e["ts"], 0 if e["event_type"] == "deposit" else 2, e["event_type"], e))
+        for f in self.store.fills_for(self.user_id, self.paper, limit=None):
+            stream.append((f["receive_ts"], 1, "fill", f))  # local processing order (receipt), not exchange time
+        stream.sort(key=lambda x: (x[0], x[1]))
+        for _, _, kind, row in stream:
+            try:
+                if kind == "deposit":
+                    amt = D(row["price"])
+                    self.funds.deposit(row["event_id"], amt, row["ts"])
+                    self.cash += amt
+                elif kind == "fill":
+                    self._apply_fill_to_books(row["fill_id"], row["ticker"], row["side"], row["action"], D(row["quantity"]), D(row["price"]),
+                                              D(row["fee"]), row["exchange_ts"], row["origin"], row["strategy"], persist=False)
+                else:
+                    self._apply_settlement(row["market_id"], row["bucket_delta"]["result"], row["ts"], persist=False)
+            except LedgerError as exc:
+                self.halts.trigger("ledger_mismatch", time.time(), f"restore: {exc}")  # latched; account still loads
+        saved = self.store.funds(self.user_id, self.paper)
+        if saved and (saved.get("savings") != str(self.funds.buckets.savings) or saved.get("reserve") != str(self.funds.buckets.reserve)):
+            if Decimal(saved.get("savings", "0")) != self.funds.buckets.savings or Decimal(saved.get("reserve", "0")) != self.funds.buckets.reserve:
+                self.halts.trigger("ledger_mismatch", time.time(), "restored buckets differ from materialized funds_state")
         # orders open at crash: paper IOC orders cannot rest → mark canceled; live → must reconcile with exchange
         for row in self.store.orders_for(self.user_id, self.paper, open_only=True):
             if self.paper:
@@ -114,7 +129,7 @@ class TradingAccount:
                             state="canceled", reject_reason="restart_paper_ioc", updated_ts=time.time()))
             else:
                 self.halts.trigger("reconnect", time.time(), "open live orders at restart")
-        self.peak_active = self.funds.buckets.active
+        self.peak_active = max(self.peak_active, self.funds.buckets.active)  # keep the replayed peak (drawdown limit)
         self.reconciled = self.paper  # paper ledger is the authoritative record; live reconciles via exchange
 
     # ---- account state for the gate ---------------------------------------------------------------------
@@ -136,7 +151,17 @@ class TradingAccount:
                             open_exposure_by_market=exp, open_positions=len({p.ticker for p in self.ledger.open_positions()}),
                             open_orders=len(open_orders), orders_by_market=per_mkt, turnover_by_market=turnover,
                             reconciled=self.reconciled and not self.journal.unknown(),
-                            consecutive_rejects=sum(1 for o in list(self.journal.orders.values())[-10:] if o.state == "rejected"))
+                            consecutive_rejects=self._consecutive_rejects())
+
+    def _consecutive_rejects(self) -> int:
+        n = 0
+        for o in reversed(list(self.journal.orders.values())):
+            if not o.terminal:
+                continue
+            if o.state != "rejected":
+                break
+            n += 1
+        return n
 
     # ---- evaluation ------------------------------------------------------------------------------------
     def _auto_halts(self, v: MarketView) -> None:
@@ -266,6 +291,8 @@ class TradingAccount:
     async def _manage_positions(self, v: MarketView, mode: Mode) -> None:
         if v.book is None or v.meta is None:
             return
+        if not v.book.valid or (v.book.age_ms() or 1e9) > self.settings.risk.max_quote_age_ms:
+            return  # no exit decisions on stale or invalid quotes; positions stay tracked (p.48, p.86)
         for p in list(self.ledger.open_positions()):
             if p.ticker != v.meta.ticker:
                 continue  # previous windows await official settlement
@@ -299,19 +326,20 @@ class TradingAccount:
                                                      pc, None, None, None, [d.reason], "exit_v1", "", mode.name, self.paper), key=f"hold-{p.ticker}-{p.side}")
 
     # ---- order submission --------------------------------------------------------------------------
-    async def _submit_entry(self, v: MarketView, c: Candidate, qty: int, all_in: Decimal, key: str, mode: Mode, origin: str = "bot") -> Order:
-        fee = v.fees.fee(qty, c.limit_price)
+    async def _submit_entry(self, v: MarketView, c: Candidate, qty: int, all_in: Decimal, key: str, mode: Mode, origin: str = "bot",
+                            book=None, fees: FeeSchedule | None = None) -> Order:
+        fee = (fees or v.fees).fee(qty, c.limit_price)
         i = OrderIntent(self.user_id, c.ticker, c.side, "buy", qty, c.limit_price, c.strategy_id, origin,
                         f"{c.strategy_id}:{','.join(c.reason_codes[:3]) or 'positive_conservative_ev'}", fee, all_in,
                         model_version=c.model_version, paper=self.paper)
         o = self.journal.record(i)
         self._order_meta[i.client_order_id] = {"reservation": key, "strategy": c.strategy_id, "origin": origin}
         self._decide(v, c, "enter", qty, [f"approved:{c.strategy_id}"], mode, size_cap=all_in)
-        await self._send(o, v)
+        await self._send(o, book if book is not None else v.book)
         return o
 
     async def _submit_exit(self, v: MarketView, ticker: str, side: str, qty: int, limit: Decimal, strategy: str, reason: str, mode: Mode,
-                           origin: str = "bot") -> Order | None:
+                           origin: str = "bot", book=None) -> Order | None:
         if not self.ledger.reserve_sell(ticker, side, Decimal(qty)):
             return None  # overlapping exits cannot sell the same inventory
         i = OrderIntent(self.user_id, ticker, side, "sell", qty, limit, strategy, origin, reason[:64], ZERO, ZERO, paper=self.paper)
@@ -319,17 +347,36 @@ class TradingAccount:
         self._order_meta[i.client_order_id] = {"reservation": None, "strategy": strategy, "origin": origin, "sell_reserved": qty}
         self._decide_raw(v, Decision(v.now, self.user_id, ticker, strategy, side, "exit", qty, limit, None, None, None, None, None,
                                      [reason], "exit_v1", "", mode.name, self.paper))
-        await self._send(o, v)
+        await self._send(o, book if book is not None else v.book)
         return o
 
-    async def _send(self, o: Order, v: MarketView) -> None:
+    async def _send(self, o: Order, book) -> None:
+        """Submit an order against *its own* market's book. Every exit path finalizes the order so cash and
+        sell reservations can never leak (p.15, p.72)."""
+        try:
+            await self._send_inner(o, book)
+        except BaseException as exc:
+            if not o.terminal and o.state != "unknown":
+                if self.paper or o.state in ("created",):
+                    self.journal.transition(o, "rejected" if o.state == "created" else "canceled", f"error:{type(exc).__name__}")
+                    self._finalize(o)
+                else:
+                    self.journal.transition(o, "unknown", f"error:{type(exc).__name__}")
+                    self.halts.trigger("reconnect", time.time(), f"exception during submit {o.intent.client_order_id}")
+            if not isinstance(exc, Exception):
+                raise
+            log.exception("order send failed")
+
+    async def _send_inner(self, o: Order, book) -> None:
         self.journal.transition(o, "submitted")
         o.submit_mono = time.monotonic()
         if self.paper:
             # fill against the book as seen after the measured/assumed latency (p.15, p.92)
             await asyncio.sleep(self.paper_exchange.latency_ms / 1000.0)
             self.journal.transition(o, "acknowledged")
-            fills = self.paper_exchange.execute_ioc(o, v.book, time.time()) if v.book is not None else []
+            fills = []
+            if book is not None and book.valid and (book.age_ms() or 1e9) <= self.settings.risk.max_quote_age_ms:
+                fills = self.paper_exchange.execute_ioc(o, book, time.time())
             for f in fills:
                 await self.on_fill(f, o)
             if not o.terminal:
@@ -374,12 +421,16 @@ class TradingAccount:
     # ---- fills / settlement / P&L --------------------------------------------------------------------
     def _apply_fill_to_books(self, fill_id: str, ticker: str, side: str, action: str, qty: Decimal, price: Decimal, fee: Decimal,
                              ts: float, origin: str, strategy: str, persist: bool = True, sell_reserved: bool = False) -> list[Realization]:
+        if fill_id in self.ledger.seen_fills:
+            return []
+        reals = self.ledger.apply_fill(fill_id, ticker, side, action, qty, price, fee, ts, origin, strategy,
+                                       sell_reservation=sell_reserved, prefer_origin=origin)  # raises before any mutation
         if action == "buy":
             self.cash -= qty * price + fee
         else:
             self.cash += qty * price - fee
-        reals = self.ledger.apply_fill(fill_id, ticker, side, action, qty, price, fee, ts, origin, strategy,
-                                       sell_reservation=sell_reserved, prefer_origin=origin if action == "sell" else None)
+        # netting: each YES+NO pair closed by a complementary buy is worth $1 immediately (venue netting)
+        self.cash += sum((r.qty for r in reals if r.kind == "net"), ZERO)
         for n, r in enumerate(reals):
             self._realize(f"{fill_id}:{n}", r, persist)
         return reals
@@ -416,9 +467,9 @@ class TradingAccount:
         self.last_action = {"ts": f.exchange_ts, "kind": f"{f.action}_{f.side}", "qty": str(f.quantity), "price": str(f.price),
                             "reason": o.intent.reason, "ticker": f.ticker}
         if self.publish:
-            await self.publish(self.user_id, "fill", {"fill_id": f.fill_id, "ticker": f.ticker, "side": f.side, "action": f.action,
+            asyncio.ensure_future(self.publish(self.user_id, "fill", {"fill_id": f.fill_id, "ticker": f.ticker, "side": f.side, "action": f.action,
                                                       "qty": str(f.quantity), "price": str(f.price), "fee": str(f.fee), "ts": f.exchange_ts,
-                                                      "paper": f.paper, "origin": meta.get("origin", "bot")})
+                                                      "paper": f.paper, "origin": meta.get("origin", "bot")}))
 
     def _apply_settlement(self, ticker: str, result: str, ts: float, persist: bool = True) -> list[Realization]:
         reals = self.ledger.settle(ticker, result, ts)
@@ -441,22 +492,28 @@ class TradingAccount:
                                                                 "realized": str(sum((r.realized for r in reals), ZERO))})
 
     # ---- manual orders (p.135) ------------------------------------------------------------------------
-    async def manual_order(self, v: MarketView, book, ticker: str, side: str, action: str, qty: int, limit: Decimal, fees: FeeSchedule) -> dict:
+    async def manual_order(self, v: MarketView, book, ticker: str, side: str, action: str, qty: int, limit: Decimal, fees: FeeSchedule,
+                           close_ts: float | None = None) -> dict:
         async with self._lock:
             now = time.time()
-            if ticker.split("-")[0] not in self.settings.risk.allowed_series and action == "buy" and not self.paper:
-                pass  # manual live orders on other markets are permitted by spec p.135 but still risk-gated below
-            if book is None or not book.valid:
+            if book is None or not book.valid or book.ticker != ticker:
                 return {"ok": False, "reasons": ["book_unavailable"]}
+            if (book.age_ms() or 1e9) > self.settings.risk.max_quote_age_ms:
+                return {"ok": False, "reasons": ["quote_stale"]}
             if not fees.known:
                 return {"ok": False, "reasons": ["fee_schedule_unknown"]}
             self.paper_exchange.fees = fees
             if action == "sell":
-                o = await self._submit_exit(v, ticker, side, qty, limit, "manual", "manual_sell", self.mode.current, origin="manual")
+                o = await self._submit_exit(v, ticker, side, qty, limit, "manual", "manual_sell", self.mode.current, origin="manual", book=book)
                 return {"ok": o is not None, "order": o.to_wire() if o else None, "reasons": [] if o else ["insufficient_inventory"]}
             c = Candidate("manual", ticker, side, "buy", qty, limit, 0.0, 0.0, Decimal("0"), limit, None, {}, 0.0, 0, "manual", "",
                           [], hold_seconds=900)
-            secs = (v.clock.close_ts - now) if (v.clock and v.meta and v.meta.ticker == ticker) else 3600.0
+            if v.clock and v.meta and v.meta.ticker == ticker:
+                secs = v.clock.close_ts - now
+            elif close_ts is not None:
+                secs = close_ts - now
+            else:
+                return {"ok": False, "reasons": ["market_close_time_unknown"]}
             hard = self.gate.hard_checks(c, self.account_state(now), self.mode.current, [h for h in self.halts.codes() if h in
                                          ("security_incident", "ledger_mismatch", "write_failure")], [], True, [], secs, book.age_ms(), origin="manual")
             key = f"man-{uuid.uuid4().hex[:12]}"
@@ -464,7 +521,7 @@ class TradingAccount:
             if not ap.approved:
                 self.gate.release(key)
                 return {"ok": False, "reasons": ap.reasons, "caps": ap.caps}
-            o = await self._submit_entry(v, c, ap.qty, ap.all_in, key, self.mode.current, origin="manual")
+            o = await self._submit_entry(v, c, ap.qty, ap.all_in, key, self.mode.current, origin="manual", book=book, fees=fees)
             self.store.audit(self.user_id, "manual_order", {"ticker": ticker, "side": side, "qty": qty, "limit": str(limit)})
             return {"ok": True, "order": o.to_wire()}
 
@@ -478,36 +535,54 @@ class TradingAccount:
         self.controls.entries_paused, self.controls.paused_reason = False, ""
         return True
 
-    def cancel_pending_entries(self) -> int:
+    async def cancel_pending_entries(self) -> int:
+        async with self._lock:
+            return await self._cancel_pending_entries()
+
+    async def _cancel_pending_entries(self) -> int:
+        """Paper: cancel locally. Live: cancel at the exchange first; only a confirmed cancel releases
+        reservations (a late fill on a locally-canceled order would otherwise be lost)."""
         n = 0
         for o in self.journal.open_orders():
-            if o.intent.action == "buy" and o.state in ("created", "acknowledged", "resting"):
-                self.journal.transition(o, "canceled", "operator_cancel_entries")
-                self._finalize(o)
-                n += 1
+            if o.intent.action != "buy" or o.state not in ("created", "acknowledged", "resting"):
+                continue
+            if not self.paper:
+                if self.live_adapter is None or not o.order_id:
+                    continue
+                from ..kalshi.rest import WriteOutcome
+                try:
+                    res = await self.live_adapter.cancel(o.order_id)
+                except Exception:
+                    continue
+                if res.outcome != WriteOutcome.ACCEPTED:
+                    continue
+            self.journal.transition(o, "canceled", "operator_cancel_entries")
+            self._finalize(o)
+            n += 1
         return n
 
     async def emergency_flatten(self, v: MarketView) -> list[dict]:
         """Attempt to sell all bot+manual inventory at available bids. Reports actual results; liquidation is not
-        guaranteed (p.16, p.115)."""
-        out = []
-        self.pause_entries("emergency_flatten")
-        self.cancel_pending_entries()
-        if v.book is None:
-            return [{"ok": False, "reason": "no_book"}]
-        for p in list(self.ledger.open_positions()):
-            if v.meta is None or p.ticker != v.meta.ticker:
-                out.append({"ticker": p.ticker, "ok": False, "reason": "market_closed_awaiting_settlement"})
-                continue
-            f = v.book.sell(p.side, p.available)
-            if f.quantity <= 0 or f.worst is None:
-                out.append({"ticker": p.ticker, "side": p.side, "ok": False, "reason": "no_bids"})
-                continue
-            o = await self._submit_exit(v, p.ticker, p.side, int(f.quantity), f.worst, "flatten", "emergency_flatten", self.mode.current,
-                                        origin="manual")
-            out.append({"ticker": p.ticker, "side": p.side, "ok": o is not None, "state": o.state if o else None,
-                        "filled": str(o.filled) if o else "0"})
-        return out
+        guaranteed (p.16, p.115). Runs under the account lock so no entry can be mid-flight."""
+        async with self._lock:
+            out = []
+            self.pause_entries("emergency_flatten")
+            await self._cancel_pending_entries()
+            if v.book is None or not v.book.valid:
+                return [{"ok": False, "reason": "no_valid_book"}]
+            for p in list(self.ledger.open_positions()):
+                if v.meta is None or p.ticker != v.meta.ticker:
+                    out.append({"ticker": p.ticker, "ok": False, "reason": "market_closed_awaiting_settlement"})
+                    continue
+                f = v.book.sell(p.side, p.available)
+                if f.quantity <= 0 or f.worst is None:
+                    out.append({"ticker": p.ticker, "side": p.side, "ok": False, "reason": "no_bids"})
+                    continue
+                o = await self._submit_exit(v, p.ticker, p.side, int(f.quantity), f.worst, "flatten", "emergency_flatten",
+                                            self.mode.current, origin="manual")
+                out.append({"ticker": p.ticker, "side": p.side, "ok": o is not None, "state": o.state if o else None,
+                            "filled": str(o.filled) if o else "0"})
+            return out
 
     # ---- decision records (p.108) ---------------------------------------------------------------------
     def _decide(self, v: MarketView, c: Candidate, action: str, qty: int, reasons: list[str], mode: Mode, size_cap: Decimal | None = None) -> None:

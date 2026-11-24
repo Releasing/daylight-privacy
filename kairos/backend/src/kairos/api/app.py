@@ -249,7 +249,7 @@ def create_app(engine: Engine, vault: Vault, dev: bool = False) -> FastAPI:
 
     @app.post("/api/controls/cancel-entries")
     async def cancel_entries(ctx: dict = Depends(current)):
-        n = account(ctx).cancel_pending_entries()
+        n = await account(ctx).cancel_pending_entries()
         store.audit(ctx["user"]["id"], "cancel_entries", {"count": n})
         return {"ok": True, "canceled": n}
 
@@ -360,7 +360,8 @@ def create_app(engine: Engine, vault: Vault, dev: bool = False) -> FastAPI:
         a = account(ctx)
         fees = engine.market.fees if m and m.series_ticker == engine.market.series else FeeSchedule("quadratic", source="general_schedule_estimate")
         v = engine.market.view()
-        return await a.manual_order(v, b, body.ticker, side, action, body.quantity, lim, fees)
+        close_ts = m.close_time.timestamp() if m is not None and getattr(m, "close_time", None) else None
+        return await a.manual_order(v, b, body.ticker, side, action, body.quantity, lim, fees, close_ts=close_ts)
 
     @app.get("/api/orders")
     async def orders(ctx: dict = Depends(current)):

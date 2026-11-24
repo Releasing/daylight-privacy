@@ -65,6 +65,9 @@ class OrderBook:
         """Apply a sequenced delta. Returns False (and invalidates) on a sequence gap."""
         if not self.valid:
             return False
+        if seq is not None and self.seq is None:
+            self.invalidate("seq_unknown_after_unsequenced_snapshot")
+            return False
         if seq is not None and self.seq is not None and seq != self.seq + 1:
             self.invalidate(f"seq_gap:{self.seq}->{seq}")
             return False

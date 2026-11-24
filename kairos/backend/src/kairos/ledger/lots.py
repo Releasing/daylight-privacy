@@ -101,7 +101,16 @@ class Ledger:
             return []  # duplicate event
         if qty <= 0 or not (ZERO <= price <= ONE) or fee < 0:
             raise LedgerError("invalid fill")
+        try:
+            out = self._apply(ticker, side, action, qty, price, fee, ts, origin, strategy, sell_reservation, prefer_origin)
+        except LedgerError:
+            raise  # nothing was mutated: checks run before any change, and the fill id stays unseen
         self.seen_fills.add(fill_id)
+        self.realizations.extend(out)
+        return out
+
+    def _apply(self, ticker: str, side: str, action: str, qty: Decimal, price: Decimal, fee: Decimal, ts: float, origin: str,
+               strategy: str, sell_reservation: bool, prefer_origin: str | None) -> list[Realization]:
         out: list[Realization] = []
         if action == "buy":
             opp = "no" if side == "yes" else "yes"
@@ -111,7 +120,8 @@ class Ledger:
                 close_q = min(qty, opp_pos.available + (opp_pos.reserved_sell if sell_reservation else ZERO))
                 if close_q > 0:
                     fee_close = (fee * close_q / qty).quantize(Decimal("0.000001"))
-                    out.extend(self._sell(opp_pos, close_q, ONE - price, fee_close, ts, "net", origin, strategy, sell_reservation))
+                    out.extend(self._sell(opp_pos, close_q, ONE - price, fee_close, ts, "net", origin, strategy, sell_reservation,
+                                          prefer_origin=origin))
                     qty -= close_q
                     fee -= fee_close
             if qty > 0:
@@ -124,12 +134,9 @@ class Ledger:
                 p.fees_paid += fee
         elif action == "sell":
             p = self.pos(ticker, side)
-            if prefer_origin:
-                p.lots.sort(key=lambda l: l.origin != prefer_origin)  # stable: FIFO within origin
-            out.extend(self._sell(p, qty, price, fee, ts, "sell", origin, strategy, sell_reservation))
+            out.extend(self._sell(p, qty, price, fee, ts, "sell", origin, strategy, sell_reservation, prefer_origin=prefer_origin))
         else:
             raise LedgerError("action")
-        self.realizations.extend(out)
         return out
 
     def reserve_sell(self, ticker: str, side: str, qty: Decimal) -> bool:
@@ -144,7 +151,7 @@ class Ledger:
         p.reserved_sell = max(ZERO, p.reserved_sell - qty)
 
     def _sell(self, p: Position, qty: Decimal, price: Decimal, fee: Decimal, ts: float, kind: str, origin: str,
-              strategy: str, from_reservation: bool) -> list[Realization]:
+              strategy: str, from_reservation: bool, prefer_origin: str | None = None) -> list[Realization]:
         avail = p.qty if from_reservation else p.available
         if qty > avail:
             raise LedgerError(f"oversell {p.ticker}/{p.side}: {qty} > {avail}")
@@ -152,16 +159,19 @@ class Ledger:
             p.reserved_sell = max(ZERO, p.reserved_sell - qty)
         remaining = qty
         basis = ZERO
-        while remaining > 0:
-            lot = p.lots[0]
+        # consume preferred-origin lots first (FIFO within origin) without reordering the lot list
+        order = sorted(range(len(p.lots)), key=lambda i: (prefer_origin is not None and p.lots[i].origin != prefer_origin, i))
+        for i in order:
+            if remaining <= 0:
+                break
+            lot = p.lots[i]
             take = min(lot.qty, remaining)
             fee_alloc = (lot.fee * take / lot.qty) if lot.qty > 0 else ZERO
             basis += take * lot.price + fee_alloc
             lot.fee -= fee_alloc
             lot.qty -= take
             remaining -= take
-            if lot.qty == 0:
-                p.lots.pop(0)
+        p.lots = [l for l in p.lots if l.qty > 0]
         proceeds = qty * price
         realized = proceeds - fee - basis
         p.realized += realized

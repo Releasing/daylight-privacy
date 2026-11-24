@@ -159,10 +159,13 @@ class Store:
         with self.engine.connect() as c:
             return [dict(r) for r in c.execute(q.order_by(S.orders.c.created_ts.desc()).limit(limit)).mappings()]
 
-    def fills_for(self, user_id: int, paper: bool, since: float = 0.0, limit: int = 5000) -> list[dict]:
+    def fills_for(self, user_id: int, paper: bool, since: float = 0.0, limit: int | None = 5000) -> list[dict]:
+        """``limit=None`` returns every fill (restart reconstruction must never truncate)."""
         with self.engine.connect() as c:
             q = (select(S.fills).where(and_(S.fills.c.user_id == user_id, S.fills.c.paper == paper, S.fills.c.exchange_ts >= since))
-                 .order_by(S.fills.c.exchange_ts).limit(limit))
+                 .order_by(S.fills.c.exchange_ts, S.fills.c.receive_ts))
+            if limit is not None:
+                q = q.limit(limit)
             return [dict(r) for r in c.execute(q).mappings()]
 
     def ledger_for(self, user_id: int, paper: bool, since: float = 0.0) -> list[dict]:

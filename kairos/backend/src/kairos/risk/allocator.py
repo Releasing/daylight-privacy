@@ -170,6 +170,13 @@ class RiskGate:
             binding = min(caps, key=lambda k: caps[k])
             max_q = min(c.max_qty, requested_qty) if requested_qty else c.max_qty
             qty, all_in = largest_feasible_quantity(budget, book, c.side, fees, max_qty=max_q, limit=c.limit_price)
+            # Reserve the worst case the IOC limit permits after latency: every contract at the limit price and
+            # the fee at the price in [best, limit] that maximizes P(1−P) (≤ 0.5). Never reserve less than that.
+            fee_px = min(c.limit_price, Decimal("0.5")) if c.limit_price >= Decimal("0.5") else c.limit_price
+            while qty > 0 and Decimal(qty) * c.limit_price + fees.fee(qty, fee_px) > budget:
+                qty -= 1
+            if qty > 0:
+                all_in = max(all_in, Decimal(qty) * c.limit_price + fees.fee(qty, fee_px))
             if qty < p.min_contracts:
                 reasons.append(f"size_below_minimum:{binding}")
                 return Approval(False, 0, budget, ZERO, {k: str(v) for k, v in caps.items()}, reasons)

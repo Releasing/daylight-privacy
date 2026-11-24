@@ -6,8 +6,8 @@ intentionally disabled until administrative authorization.
 
 Test files: **C** `tests/unit/test_core.py` · **I** `tests/unit/test_intelligence.py` · **X**
 `tests/unit/test_coverage_extra.py` · **R** `tests/unit/test_research_job.py` · **E**
-`tests/integration/test_engine_api.py` · **F** `tests/faults/test_faults.py` · **UI** Playwright layout run
-(`docs/screenshots/`). 108 automated tests pass (`cd backend && pytest -q`).
+`tests/integration/test_engine_api.py` · **F** `tests/faults/test_faults.py` · **RR** `tests/integration/test_review_regressions.py` · **UI** Playwright layout run
+(`docs/screenshots/`). 114 automated tests pass (`cd backend && pytest -q`).
 
 Module paths are relative to `backend/src/kairos/` unless prefixed `frontend/` or `deploy/`.
 
@@ -149,6 +149,8 @@ Module paths are relative to `backend/src/kairos/` unless prefixed `frontend/` o
 | Reconciliation mismatch → halt | 12, 15 | `execution/reconcile.py` | I `test_reconcile_mismatch_and_markouts` | DONE (live exchange reconciliation loop: IMPL, needs live key) |
 | Markouts 1/5/30 s | 48 | `execution/reconcile.py::Markouts` | I `test_reconcile_mismatch_and_markouts` | DONE |
 | Live order body / V2 path | 15, 135 | `execution/orders.py::LiveAdapter` | — | GATED; schema unverified (sandbox) |
+| Live fill ingestion + exchange reconciliation loop | 12, 15 | — | live refused in `cli.py` | NOT BUILT — hard-blocked until implemented on demo API |
+| Exchange-confirmed cancels; send errors never leak reservations | 15, 72 | `engine/account.py` | RR `test_live_cancel_requires_exchange_confirmation`, `test_send_exception_releases_reservations` | DONE |
 
 ## §11 Ledger and finance (p.21–22, 68–72, 76)
 
@@ -157,6 +159,7 @@ Module paths are relative to `backend/src/kairos/` unless prefixed `frontend/` o
 | Lots $15.75 / avg 35¢; partial exits $9; −$10; no oversell; fee allocation; netting | 21–22, 31–32 | `ledger/lots.py` | I `test_three_lots`, `test_partial_exits_and_duplicates`, `test_no_oversell_and_fee_allocation`, `test_netting_buy_no_closes_yes` | DONE |
 | HWM table; balanced $10/$8/$2; residual to savings; policy moves | 68–70 | `finance/accounts.py` | I `test_hwm_table`, `test_balanced_split_and_protected_excluded`, `test_rounding_residual_to_savings_and_policy_moves` | DONE |
 | Append-only ledger schema | 76 | `db/schema.py` | E (restart reconstruction) | DONE |
+| Netting cash conservation; restore order/peak; invalid fill never mutates cash | 12, 70, 77 | `engine/account.py`, `ledger/lots.py` | RR `test_netting_cash_conserved`, `test_restore_reproduces_hwm_and_peak`, `test_oversell_fill_does_not_touch_cash_and_restore_survives` | DONE |
 
 ## §12 Optional Claude research (p.19, 45, 93–95)
 
@@ -200,7 +203,7 @@ Module paths are relative to `backend/src/kairos/` unless prefixed `frontend/` o
 | Tenant isolation; cross-tenant denial | 137 | `api/app.py`, `db/store.py` | E `test_api_auth_csrf_tenant_and_community` | DONE |
 | HttpOnly SameSite cookies, CSRF, rate limits, MFA (TOTP), re-auth, audit, WS origin + auth | 115, 137 | `api/app.py`, `security/vault.py` | E `test_api_auth_csrf_tenant_and_community`, `test_login_rate_limited`, `test_ws_requires_auth_and_origin` | DONE (passkeys not implemented; TOTP satisfies MFA) |
 | Leaderboard metrics, opt-in, revocation, paper/live separated, no fake users | 136 | `community/leaderboard.py` | E `test_api_auth_csrf_tenant_and_community` | DONE |
-| Manual vs bot origin; shared buying power; bot manages manual only if enabled | 135 | `engine/account.py` | E `test_manual_and_bot_share_funds` | DONE |
+| Manual vs bot origin; shared buying power; bot manages manual only if enabled | 135 | `engine/account.py` | E `test_manual_and_bot_share_funds`; RR `test_manual_order_uses_its_own_book` | DONE |
 | User cap until load tested | 137 | `config.max_users`, `cli create-user` | — | DONE (load test on VPS: IMPL) |
 
 ## §16 Open questions / unresolved (must be answered on the VPS or by the operator)
