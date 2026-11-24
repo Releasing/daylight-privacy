@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlyyAir Performance — concept demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060606; --panel:#0f0f0f; --panel2:#161616; --line:#262626;
+  --ink:#f3f3ef; --mute:#9a9a94; --green:#9bc61a; --green-d:#80a315; --red:#e5372b;
+  --display:"Anton","Impact","Haettenschweiler","Arial Narrow Bold",sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--green)}
+h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(40px,7vw,84px);line-height:.95;letter-spacing:.01em;margin:10px 0 16px}
+h2 em{font-style:normal;color:var(--green)}
+.lead{color:var(--mute);max-width:58ch;font-size:17px}
+section{padding:96px 0;position:relative}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--green);color:#0a0a0a;font-weight:700;padding:14px 22px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;font-size:13px;transition:transform .15s,background .15s}
+.btn:hover{background:#b4e02a;transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--green);color:var(--green)}
+
+/* ---------- loader ---------- */
+#loader{position:fixed;inset:0;background:#000;z-index:100;display:grid;place-items:center;transition:transform .7s cubic-bezier(.7,0,.2,1)}
+#loader.done{transform:translateY(-100%)}
+.gauge{position:relative;width:220px;height:220px}
+.gauge svg{width:100%;height:100%;transform:rotate(135deg)}
+.gauge .track{fill:none;stroke:#1c1c1c;stroke-width:10;stroke-linecap:round;stroke-dasharray:424 566}
+.gauge .fill{fill:none;stroke:var(--green);stroke-width:10;stroke-linecap:round;stroke-dasharray:0 566;filter:drop-shadow(0 0 8px rgba(155,198,26,.7))}
+.gauge .mid{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.gauge .word{font-family:var(--display);font-size:34px;letter-spacing:.04em;line-height:1}
+.gauge .word span{color:var(--green)}
+.gauge .psi{font-family:var(--mono);font-size:13px;color:var(--mute);margin-top:6px}
+.gauge .note{position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:#555;text-transform:uppercase}
+
+/* ---------- nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(#000c,#0000);backdrop-filter:blur(6px)}
+.logo{font-family:var(--display);font-size:24px;letter-spacing:.04em}
+.logo span{color:var(--green)}
+nav ul{display:flex;gap:26px;list-style:none;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:#cfcfc9}
+nav ul a:hover{color:var(--green)}
+nav .btn{padding:10px 16px;font-size:12px}
+@media(max-width:820px){nav ul{display:none}}
+
+/* ---------- hero ---------- */
+#hero{min-height:100svh;padding:0;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
+  background:radial-gradient(1200px 500px at 50% 100%,rgba(155,198,26,.13),transparent 70%),linear-gradient(#0a0a0a,#050505)}
+.hero-title{position:relative;z-index:1;margin-top:68px;text-align:center;white-space:nowrap;font-family:var(--display);text-transform:uppercase;
+  font-size:clamp(46px,13.6vw,205px);line-height:.9;letter-spacing:.005em;color:#151515;-webkit-text-stroke:1px #2c2c2c;user-select:none;transition:color .5s,-webkit-text-stroke-color .5s,text-shadow .5s}
+.hero-title b{font-weight:400}
+#hero.slammed .hero-title{color:var(--ink);-webkit-text-stroke-color:transparent}
+#hero.slammed .hero-title b{color:var(--green);text-shadow:0 0 60px rgba(155,198,26,.35)}
+.stage{position:relative;width:min(1180px,100%);margin:-5.5vw auto 0;z-index:2}
+.stage svg{display:block;width:100%;height:auto;overflow:visible}
+.floor{height:1px;background:linear-gradient(90deg,transparent,#3a3a3a 20%,#3a3a3a 80%,transparent)}
+.hero-bar{position:relative;z-index:3;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding:4px 20px 14px;max-width:1200px;margin:0 auto;width:100%}
+.hero-copy p{color:var(--mute);max-width:46ch;margin:8px 0 18px}
+.hero-copy .row{display:flex;gap:10px;flex-wrap:wrap}
+/* controller: handheld-style remote */
+.remote{width:236px;background:linear-gradient(160deg,#3b393e,#252427 42%,#1a191c);border:1px solid #4a484e;border-radius:22px;padding:10px 12px 10px;box-shadow:0 24px 60px #000b,inset 0 1px 0 #5a585e;user-select:none}
+.r-top{position:relative;height:30px;display:grid;place-items:center}
+.r-logo{display:grid;place-items:center}
+.r-logo span{color:var(--green)}
+.r-led{position:absolute;right:4px;top:9px;width:10px;height:10px;border-radius:50%;background:#77736c;box-shadow:inset 0 -2px 3px #0008;transition:background .2s,box-shadow .2s}
+.remote.moving .r-led{background:var(--green);box-shadow:0 0 10px var(--green)}
+.r-screen{background:#0a0a0b;border-radius:8px;padding:8px;margin-top:4px;border:1px solid #000}
+.r-head{display:grid;grid-template-columns:22px 1fr 22px;gap:8px;align-items:center}
+.r-head svg{width:18px;height:18px;fill:#bdbdb8;display:block;margin:auto}
+.r-head button[aria-pressed=false] svg{fill:#4a4a4a}
+.r-mode{background:#000;border-radius:999px;text-align:center;font-size:13px;font-weight:600;padding:5px 0;color:#f0f0ee}
+.r-tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.r-tile{background:#1c1c1e;border-radius:10px;padding:6px 8px 7px;text-align:left;border:1px solid transparent;transition:border-color .15s}
+.r-tile.sel{border-color:var(--green)}
+.r-tile .t{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:#c9c9c5}
+.r-tile .t i,.r-tank i{font-style:normal;font-size:8px;font-weight:700;background:#3a3a3c;color:#d6d6d2;border-radius:999px;padding:1px 6px}
+.r-tile .v{display:flex;align-items:flex-end;gap:7px;margin-top:3px}
+.r-bar{width:6px;height:30px;border-radius:3px;background:#3a3a3c;position:relative;overflow:hidden}
+.r-bar u{position:absolute;left:0;right:0;bottom:0;background:#f0f0ee;border-radius:3px}
+.r-tile b{font-family:var(--display);font-weight:400;font-size:32px;line-height:.95;color:#f0f0ee;min-width:38px}
+.r-tank{display:flex;align-items:center;justify-content:center;gap:8px;background:#1c1c1e;border-radius:10px;padding:5px 0;margin:6px 26px 0}
+.r-tank b{font-family:var(--display);font-weight:400;font-size:22px;line-height:1;color:#f0f0ee}
+.r-tank span{font-size:10px;font-weight:700;color:#c9c9c5;display:grid;gap:2px;justify-items:start}
+.r-list{display:none;gap:6px;margin-top:8px}
+.r-list button{background:#1c1c1e;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:#f0f0ee;border:1px solid transparent}
+.r-list button small{font-family:var(--mono);font-size:10px;color:#8d8d88}
+.r-list button:hover,.r-list button.on{border-color:var(--green)}
+.r-screen[data-view=presets] .r-list{display:grid}
+.r-screen[data-view=presets] .r-tiles,.r-screen[data-view=presets] .r-tank{display:none}
+.r-tip{display:none;font-size:10px;color:#8d8d88;text-align:center;margin-top:6px}
+.r-screen[data-view=manual] .r-tip{display:block}
+.r-screen[data-view=manual] .r-tank{display:none}
+.r-tabs{display:grid;grid-template-columns:repeat(3,1fr);margin-top:8px;padding-top:6px;border-top:1px solid #1d1d1f}
+.r-tabs button{font-size:10px;font-weight:600;color:#77777a;display:grid;justify-items:center;gap:2px}
+.r-tabs svg{width:15px;height:15px;fill:currentColor}
+.r-tabs button[aria-selected=true]{color:#f0f0ee}
+.r-keys{display:grid;grid-template-columns:1fr 1.8fr 1fr;gap:7px;margin-top:10px}
+.r-keys button,.r-mid{height:38px;border-radius:12px;background:linear-gradient(#1b1a1c,#0b0b0c);border:1px solid #000;box-shadow:inset 0 1px 0 #3a383d;display:grid;place-items:center;touch-action:none;transition:transform .08s,filter .08s}
+.r-mid{display:grid;grid-template-columns:1fr 1fr;border-radius:19px;overflow:hidden}
+.r-mid button{border:0;border-radius:0;box-shadow:none;background:none;height:100%;width:100%}
+.r-mid button+button{border-left:1px solid #2c2b2e}
+.r-keys svg{width:20px;height:20px;fill:none;stroke:#f3f3ef;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.r-keys button:active,.r-keys button.on{transform:scale(.94);filter:brightness(1.8)}
+.r-keys button.on svg,.r-keys button:active svg{stroke:var(--green)}
+.r-lbl{display:grid;grid-template-columns:1fr .9fr .9fr 1fr;gap:7px;margin-top:4px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:#8d8b90;text-align:center}
+.hint{display:block;text-align:center;margin-bottom:8px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--green);text-transform:uppercase;animation:bob 1.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(5px)}}
+@media(max-width:860px){.hero-bar{grid-template-columns:1fr;justify-items:center;text-align:center}.hero-copy .row{justify-content:center}.hero-copy p{margin-inline:auto}.hero-bar>div:last-child{order:-1}}
+
+/* ---------- marquee ---------- */
+.marq{border-block:1px solid var(--line);overflow:hidden;background:#0a0a0a;padding:14px 0}
+.marq div{display:flex;gap:48px;white-space:nowrap;width:max-content;animation:slide 28s linear infinite;font-family:var(--display);font-size:22px;text-transform:uppercase;letter-spacing:.06em;color:#3d3d3d}
+.marq i{font-style:normal;color:var(--green)}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* ---------- rack ---------- */
+.rack-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:40px}
+.rack{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;overflow:hidden}
+.rack h3{font-family:var(--display);font-weight:400;font-size:26px;text-transform:uppercase;letter-spacing:.03em}
+.rack p{color:var(--mute);font-size:14px}
+.rack svg{width:100%;height:auto;margin-top:8px;display:block}
+.rack.bad h3{color:#777}.rack.good{border-color:#33440d;box-shadow:0 0 60px rgba(155,198,26,.08)}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;padding:4px 10px;border-radius:999px;margin-bottom:10px}
+.bad .tag{background:#2a0f0d;color:#ff8178}.good .tag{background:#1b2607;color:var(--green)}
+.carA{animation:hit 4s ease-in-out infinite}
+.carB{animation:roll 4s ease-in-out infinite}
+@keyframes hit{0%{transform:translateX(330px)}38%,44%{transform:translateX(118px)}41%{transform:translateX(121px) translateY(-2px)}47%,80%{transform:translateX(120px)}100%{transform:translateX(330px)}}
+@keyframes roll{0%{transform:translateX(330px)}50%,80%{transform:translateX(-10px)}100%{transform:translateX(330px)}}
+.spark{opacity:0;animation:spark 4s linear infinite}
+@keyframes spark{0%,37%{opacity:0}40%,75%{opacity:1}85%,100%{opacity:0}}
+.svc{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:18px}
+.svc a{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;transition:border-color .15s,transform .15s}
+.svc a:hover{border-color:var(--green);transform:translateY(-2px)}
+.svc small{display:block;color:var(--mute);font-size:12px}
+.svc span{font-family:var(--mono);color:var(--green);font-size:12px;white-space:nowrap}
+@media(max-width:760px){.rack-grid{grid-template-columns:1fr}}
+
+/* ---------- builder ---------- */
+#build{background:linear-gradient(#060606,#0a0a0a)}
+.builder{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-top:40px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px}
+.step{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase;margin:18px 0 10px}
+.step:first-child{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:#131313;border-radius:999px;padding:9px 14px;font-size:13px;transition:all .12s}
+.chip:hover{border-color:#555}
+.chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:#000;font-weight:600}
+.opts{display:grid;gap:8px}
+.opt{display:flex;justify-content:space-between;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:#131313;border-radius:14px;padding:12px 14px;font-size:14px;width:100%}
+.opt small{display:block;color:var(--mute);font-size:12px}
+.opt b{font-family:var(--mono);font-size:13px;white-space:nowrap}
+.opt[aria-pressed=true]{border-color:var(--green);background:#141a08}
+.opt[aria-pressed=true] b{color:var(--green)}
+.sw{width:38px;height:38px;border-radius:50%;border:2px solid #333;outline-offset:3px}
+.sw[aria-pressed=true]{outline:2px solid var(--green)}
+.summary{position:sticky;top:80px;align-self:start}
+.summary .fit{font-family:var(--display);font-size:30px;text-transform:uppercase;line-height:1}
+.summary ul{list-style:none;margin:16px 0;border-top:1px solid var(--line)}
+.summary li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;color:#cfcfc9}
+.summary li span:last-child{font-family:var(--mono)}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+.total b{font-family:var(--display);font-weight:400;font-size:46px;color:var(--green)}
+.tank{height:54px;border-radius:27px;margin-bottom:16px;border:1px solid #333;position:relative;transition:background .3s}
+.tank:after{content:"";position:absolute;left:8%;right:8%;top:10px;height:8px;border-radius:8px;background:linear-gradient(90deg,#fff6,#fff0)}
+.fine{font-size:11px;color:#666;margin-top:12px}
+@media(max-width:860px){.builder{grid-template-columns:1fr}.summary{position:static}}
+
+/* ---------- giveaway ---------- */
+#give{background:radial-gradient(900px 400px at 80% 0,rgba(155,198,26,.1),transparent 70%)}
+.tabs{display:inline-flex;background:#111;border:1px solid var(--line);border-radius:999px;padding:4px;margin-top:26px}
+.tabs button{padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;color:var(--mute)}
+.tabs button[aria-selected=true]{background:var(--ink);color:#000}
+.give{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+.prize{min-height:340px;border-radius:20px;border:1px solid var(--line);padding:22px;display:flex;flex-direction:column;justify-content:space-between;
+  background:repeating-linear-gradient(135deg,#111 0 16px,#0d0d0d 16px 32px)}
+.prize h3{font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,56px);text-transform:uppercase;line-height:.95}
+.ph{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#666;text-transform:uppercase}
+.count{display:flex;gap:10px;margin-top:14px}
+.count div{background:#000;border:1px solid var(--line);border-radius:12px;padding:10px 0;width:70px;text-align:center;font-family:var(--mono);font-size:26px;font-weight:700}
+.count small{display:block;font-size:9px;letter-spacing:.14em;color:var(--mute);font-weight:500}
+.live{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:13px;color:var(--mute);margin-top:14px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(155,198,26,.7);animation:ping 1.6s infinite}
+.live b{color:var(--ink)}
+@keyframes ping{to{box-shadow:0 0 0 10px rgba(155,198,26,0)}}
+.bundles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.bundle{border:1px solid var(--line);background:#131313;border-radius:14px;padding:14px;text-align:left;position:relative}
+.bundle b{font-family:var(--display);font-weight:400;font-size:32px;display:block;line-height:1}
+.bundle small{color:var(--mute);font-size:12px}
+.bundle em{position:absolute;top:10px;right:10px;font-style:normal;font-family:var(--mono);font-size:10px;background:var(--green);color:#000;padding:2px 7px;border-radius:999px}
+.bundle[aria-pressed=true]{border-color:var(--green);background:#141a08}
+.field{width:100%;background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:13px 14px;color:var(--ink);font:inherit;font-size:14px;margin-top:10px}
+.field:focus{outline:2px solid var(--green-d);border-color:transparent}
+.pay{width:100%;margin-top:10px;background:#fff;color:#000;border-radius:12px;height:52px;font-weight:600;font-size:17px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
+.pay:hover{opacity:.9}
+.pay.card2{background:#1b1b1b;color:var(--ink);border:1px solid var(--line);font-size:14px;height:46px}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid #0003;border-top-color:var(--green-d);animation:rot .6s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.ok{text-align:center;padding:26px 10px}
+.ok .tick{width:64px;height:64px;border-radius:50%;background:var(--green);color:#000;display:grid;place-items:center;font-size:32px;margin:0 auto 14px;animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(0)}}
+.ok h3{font-family:var(--display);font-weight:400;font-size:34px;text-transform:uppercase}
+.tix{font-family:var(--mono);color:var(--green);font-size:18px;margin:8px 0}
+.owner{margin-top:20px;display:none}
+.owner.show{display:block}.buyer.hide{display:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat b{font-family:var(--display);font-weight:400;font-size:30px;display:block}
+.stat small{color:var(--mute);font-size:12px}
+.own-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-top:14px}
+.own-grid>*,.give>*,.builder>*{min-width:0}
+.tbl{max-height:330px;overflow:auto;border-radius:12px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:#151515;text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--mute);padding:10px 12px;text-transform:uppercase}
+td{padding:9px 12px;border-top:1px solid #1c1c1c;white-space:nowrap}
+td.m{font-family:var(--mono);color:var(--green)}
+tr.new td{animation:flash 1.6s}
+tr.win td{background:#1b2607}
+@keyframes flash{from{background:#33440d}}
+.draw{text-align:center}
+.reel{font-family:var(--mono);font-weight:700;font-size:clamp(40px,6vw,64px);letter-spacing:.06em;background:#000;border:1px solid var(--line);border-radius:14px;padding:18px 0;margin:14px 0;color:var(--green)}
+.winner{min-height:56px;font-size:15px;color:var(--mute)}
+.winner b{display:block;font-family:var(--display);font-weight:400;font-size:32px;color:var(--ink);text-transform:uppercase}
+#confBox{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:90}
+.conf{position:absolute;top:-20px;width:9px;height:14px;z-index:90;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media(max-width:860px){.give,.own-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------- builds ---------- */
+.builds{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:190px;gap:10px;margin-top:36px}
+.tile{border-radius:16px;border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;
+  background:repeating-linear-gradient(135deg,#121212 0 14px,#0e0e0e 14px 28px);transition:transform .25s,border-color .25s}
+.tile:hover{transform:scale(1.02);border-color:var(--green)}
+.tile.w{grid-column:span 2}.tile.t{grid-row:span 2}
+.tile b{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase}
+.tile small{color:var(--mute);font-size:12px}
+.tile .ph{position:absolute;top:14px;left:14px}
+@media(max-width:760px){.builds{grid-template-columns:repeat(2,1fr);grid-auto-rows:150px}}
+
+footer{border-top:1px solid var(--line);padding:56px 0 30px}
+.foot{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:24px}
+.foot h4{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase;margin-bottom:10px;font-weight:500}
+.foot p{color:#cfcfc9;font-size:14px}
+.big{font-family:var(--display);font-size:clamp(46px,9vw,120px);text-transform:uppercase;line-height:.9;margin-bottom:26px}
+.big em{font-style:normal;color:var(--green)}
+.disc{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:#666}
+@media(max-width:760px){.foot{grid-template-columns:1fr}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+
+/* ---------- site shell ---------- */
+.page{display:none}.page.on{display:block}
+.page>section:first-child:not(#hero){padding-top:130px}
+img{max-width:100%;display:block}
+
+nav .logoimg{height:34px;width:auto}
+.nav-r{display:flex;align-items:center;gap:10px}
+.cart{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center}
+.cart svg{width:18px;height:18px;fill:none;stroke:var(--ink);stroke-width:2}
+.cart b{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--green);color:#000;font-size:11px;display:grid;place-items:center;padding:0 4px}
+nav ul a.on{color:var(--green)}
+nav ul a.hot:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:middle;animation:ping 1.6s infinite}
+.burger{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;place-items:center}
+.burger svg{width:20px;height:20px;stroke:var(--ink);stroke-width:2;fill:none}
+#menu{position:fixed;inset:0;z-index:80;background:#000;padding:24px 22px;display:none;flex-direction:column;overflow:auto}
+#menu.open{display:flex}
+#menu img{height:76px;margin:6px auto 18px}
+#menu a{font-family:var(--display);font-size:30px;text-transform:uppercase;padding:13px 4px;border-bottom:1px solid var(--line);letter-spacing:.02em}
+#menu a.on{color:var(--green)}
+#menu .x{position:absolute;top:18px;right:18px;font-size:30px;line-height:1;width:44px;height:44px}
+@media(max-width:1020px){nav ul{display:none}.burger{display:grid}nav .btn{display:none}}
+.dock{display:none}
+@media(max-width:760px){.dock{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(4,1fr);background:#0b0b0bf2;backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+ .dock a{padding:9px 0 10px;text-align:center;font-size:11px;color:#cfcfc9;display:grid;gap:3px;justify-items:center}.dock svg{width:20px;height:20px;fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}body{padding-bottom:58px}}
+.phead{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center}
+.phead img{border-radius:20px;border:1px solid var(--line);width:100%}
+.phead img.cut{border:0;mix-blend-mode:screen;max-width:340px;margin:auto}
+@media(max-width:860px){.phead{grid-template-columns:1fr}}
+.doors{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.door{position:relative;min-height:360px;border-radius:20px;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:22px;background:#0d0d0d;transition:transform .25s,border-color .25s}
+.door:hover{transform:translateY(-4px);border-color:var(--green)}
+.door img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5;transition:opacity .3s,transform .6s}
+.door:hover img{opacity:.7;transform:scale(1.04)}
+.door:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,#000d)}
+.door>*:not(img){position:relative;z-index:1}
+.door h3{font-family:var(--display);font-weight:400;font-size:36px;text-transform:uppercase;line-height:1}
+.door p{color:#cfcfc9;font-size:14px;margin-top:6px}
+.door.g{background:radial-gradient(400px 260px at 70% 20%,rgba(155,198,26,.35),#0d0d0d 70%)}
+@media(max-width:860px){.doors{grid-template-columns:1fr}.door{min-height:240px}}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px}
+.prod{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,border-color .2s}
+.prod:hover{transform:translateY(-3px);border-color:#4a4a4a}
+.prod .ph2{aspect-ratio:1;background:#000;overflow:hidden;position:relative}
+.prod .ph2 img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.prod:hover .ph2 img{transform:scale(1.05)}
+.prod .out{position:absolute;top:10px;left:10px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;background:#000c;border:1px solid #444;border-radius:999px;padding:3px 9px}
+.prod .in{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.prod h4{font-size:14px;font-weight:600;line-height:1.3}
+.prod .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:8px}
+.prod .pr{font-family:var(--mono);font-size:13px;color:var(--green)}
+.prod button{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600}
+.prod button:hover:not(:disabled){background:var(--green);border-color:var(--green);color:#000}
+.prod button:disabled{opacity:.4;cursor:default}
+@media(max-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:28px}
+select.field,input.field,textarea.field{appearance:none}
+.bar select{width:auto;margin:0;padding:9px 14px;border-radius:999px;font-size:13px}
+.band{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--panel)}
+.band img{width:100%;height:100%;object-fit:cover;min-height:280px}
+.band div{padding:34px;display:flex;flex-direction:column;justify-content:center;gap:12px;align-items:flex-start}
+.band h3{font-family:var(--display);font-weight:400;font-size:clamp(32px,4.5vw,54px);text-transform:uppercase;line-height:.95}
+@media(max-width:760px){.band{grid-template-columns:1fr}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.two>*{min-width:0}
+label.l{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-top:14px}
+textarea.field{min-height:110px;resize:vertical}
+.info p{font-size:17px;margin-bottom:14px}.info a{color:var(--green)}
+.svcl{display:grid;gap:8px}
+.faq details{border-bottom:1px solid var(--line);padding:16px 0}
+.faq summary{cursor:pointer;font-weight:600;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary:after{content:"+";color:var(--green);font-family:var(--mono)}
+.faq details[open] summary:after{content:"–"}
+.faq p{color:var(--mute);margin-top:10px;max-width:70ch}
+.toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);background:var(--green);color:#000;font-weight:700;font-size:13px;padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:95;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.sign{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;width:100%}.sign input{flex:1;min-width:180px;margin:0}
+.gauge .mid img{width:150px}
+.r-logo img{height:20px}
+.prize{position:relative;overflow:hidden}.prize img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}.prize:after{content:"";position:absolute;inset:0;background:linear-gradient(#0006,#000e)}.prize>*:not(img){position:relative;z-index:1}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6}.tile:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,#000d)}.tile>*:not(img){position:relative;z-index:1}
+footer img{height:70px;margin-bottom:22px}
+.flinks{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:var(--mute)}.flinks a:hover{color:var(--green)}
+</style>
+</head>
+<body>
+<div id="loader" aria-hidden="true">
+  <div class="gauge">
+    <svg viewBox="0 0 200 200"><circle class="track" cx="100" cy="100" r="90"/><circle class="fill" id="gFill" cx="100" cy="100" r="90"/></svg>
+    <div class="mid"><div><img data-img="logoV" alt="FlyyAir"><div class="psi"><span id="gNum">0</span> PSI</div></div></div>
+    <div class="note">Building pressure</div>
+  </div>
+</div>
+<nav>
+  <a href="#/" aria-label="FlyyAir home"><img class="logoimg" data-img="logoH" alt="FlyyAir"></a>
+  <ul><li><a href="#/suspension" data-nav="suspension" class="">Suspension</a></li><li><a href="#/performance" data-nav="performance" class="">Performance</a></li><li><a href="#/shop" data-nav="shop" class="">Shop</a></li><li><a href="#/giveaway" data-nav="giveaway" class="hot">Giveaway</a></li><li><a href="#/about" data-nav="about" class="">About</a></li><li><a href="#/appointment" data-nav="appointment" class="">Appointment</a></li><li><a href="#/contact" data-nav="contact" class="">Contact</a></li></ul>
+  <div class="nav-r">
+    <a class="cart" href="#/shop" aria-label="Cart"><svg viewBox="0 0 24 24"><path d="M3 4h2.500l2.200 11h10.600L20 7H7"/><circle cx="9.500" cy="19" r="1.300"/><circle cx="17" cy="19" r="1.300"/></svg><b id="cartN">0</b></a>
+    <a class="btn" href="#/appointment">Book now</a>
+    <button class="burger" id="burger" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</nav>
+<div id="menu"><button class="x" id="menuX" aria-label="Close menu">×</button><img data-img="logoV" alt="FlyyAir"><a href="#/suspension" data-nav="suspension" class="">Suspension</a><a href="#/performance" data-nav="performance" class="">Performance</a><a href="#/shop" data-nav="shop" class="">Shop</a><a href="#/giveaway" data-nav="giveaway" class="">Giveaway</a><a href="#/about" data-nav="about" class="">About</a><a href="#/appointment" data-nav="appointment" class="">Appointment</a><a href="#/contact" data-nav="contact" class="">Contact</a><a href="#/warranty" data-nav="warranty" class="">Warranty submission</a></div>
+<div class="dock">
+  <a href="tel:+13477848577"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>Call</a>
+  <a href="https://www.google.com/maps/search/?api=1&query=1542+Ree+Ln+Unit+1+Kissimmee+FL+34741" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.200 7-11a7 7 0 0 0-14 0c0 4.800 7 11 7 11z"/><circle cx="12" cy="10" r="2.500"/></svg>Location</a>
+  <a href="#/giveaway"><svg viewBox="0 0 24 24"><path d="M4 11h16v9H4zM3 7h18v4H3zM12 7v13M12 7s-1-4-4-4a2 2 0 0 0 0 4zM12 7s1-4 4-4a2 2 0 0 1 0 4z"/></svg>Giveaway</a>
+  <a href="#/appointment"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>Book</a>
+</div>
+<!-- shared car artwork -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="paint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2b2b"/><stop offset=".45" stop-color="#141414"/><stop offset="1" stop-color="#090909"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20301a"/><stop offset="1" stop-color="#050705"/></linearGradient>
+    <radialGradient id="rim"><stop offset=".55" stop-color="#3a3a3a"/><stop offset="1" stop-color="#9a9a9a"/></radialGradient>
+    <g id="wheel">
+      <circle r="62" fill="#070707"/><circle r="61" fill="none" stroke="#1d1d1d" stroke-width="2"/>
+      <circle r="46" fill="url(#rim)"/><circle r="40" fill="#0c0c0c"/>
+      <g stroke="#8d8d8d" stroke-width="7" stroke-linecap="round">
+        <path d="M0-38V38M-38 0H38M-27-27 27 27M-27 27 27-27"/>
+      </g>
+      <circle r="10" fill="#9bc61a"/><circle r="4" fill="#0a0a0a"/>
+    </g>
+    <g id="carWheels"><use href="#wheel" transform="translate(235 250) scale(.806)"/><use href="#wheel" transform="translate(765 250) scale(.806)"/></g>
+    <g id="carBody">
+      <path fill="url(#paint)" stroke="#3b3b3b" stroke-width="1.5" d="M70 262 L60 236 Q58 200 90 186 Q200 158 330 148 L432 96 Q530 76 644 90 L790 140 L900 148 Q942 152 947 190 L950 240 L936 262 L813.4 262 A58 58 0 1 0 716.6 262 L283.4 262 A58 58 0 1 0 186.6 262 Z"/>
+      <path fill="url(#glass)" d="M352 146 L438 104 Q530 88 634 100 L760 142 Z"/>
+      <path stroke="#0a0a0a" stroke-width="6" d="M548 92 L556 146"/>
+      <path fill="none" stroke="#9bc61a" stroke-width="2" opacity=".85" d="M90 186 Q200 158 330 148 L432 96 Q530 76 644 90 L790 140 L900 148"/>
+      <path fill="none" stroke="#262626" stroke-width="1.5" d="M342 152 L338 258 M556 148 L560 258 M342 152 L770 146"/>
+      <path fill="#eaffb0" d="M66 204 L112 190 L108 200 L68 214 Z"/>
+      <path fill="#e5372b" d="M945 184 L902 164 L904 174 L947 196 Z"/>
+      <rect x="283" y="254" width="434" height="8" fill="#1f1f1f"/>
+      <rect x="430" y="180" width="34" height="5" rx="2.5" fill="#333"/><rect x="620" y="178" width="34" height="5" rx="2.5" fill="#333"/>
+    </g>
+  </defs>
+</svg>
+
+
+<main class="page" data-page="home">
+<section id="hero">
+  <div class="hero-title" aria-hidden="true">Static <b>is dead</b></div>
+  <div class="stage">
+    <svg viewBox="0 60 1000 250" role="img" aria-label="Side view of a car that lowers when you press the air out controls">
+      <ellipse id="shadow" cx="500" cy="302" rx="430" ry="10" fill="#000" opacity=".55"/>
+      <ellipse id="glow" cx="500" cy="300" rx="380" ry="5" fill="#9bc61a" opacity="0" style="filter:blur(10px)"/>
+      <use href="#carWheels"/>
+      <g id="body"><use href="#carBody"/></g>
+    </svg>
+    <div class="floor"></div>
+  </div>
+  <div class="hero-bar">
+    <div class="hero-copy">
+      <span class="eyebrow">Kissimmee, FL · Air suspension &amp; alignment</span>
+      <h1 style="font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(30px,4vw,48px);line-height:1;margin-top:8px">Built for cars that sit on the ground.</h1>
+      <p>FlyyAir air suspension, installed in-house, aligned on an in-ground rack with no limit on how low you are.</p>
+      <div class="row"><a class="btn" href="#/suspension">Find my kit</a><a class="btn ghost" href="#/giveaway">Enter the giveaway</a></div>
+    </div>
+    <div>
+      <span class="hint" id="hint">Hold ◀ to air out</span>
+      <div class="remote" id="remote" aria-label="Air suspension controller">
+        <!-- his logo replaces this wordmark -->
+        <div class="r-top"><div class="r-logo"><img data-img="logoH" alt="FlyyAir"></div><i class="r-led"></i></div>
+        <div class="r-screen" id="rscreen" data-view="drive">
+          <div class="r-head">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.5 7.5 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.4zM13 15.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4z"/></svg>
+            <div class="r-mode" id="rmode">Low Cruise</div>
+            <button id="snd" aria-pressed="true" aria-label="Sound" title="Sound on/off"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-6 6v4l-2 3.5h16L18 13V9a6 6 0 0 0-6-6zm-2.2 15.5a2.2 2.2 0 0 0 4.4 0z"/></svg></button>
+          </div>
+          <div class="r-tiles">
+            <button class="r-tile" data-ax="f"><span class="t">LF<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="f"></u></span><b data-psi="f">40</b></span></button>
+            <button class="r-tile" data-ax="f"><span class="t">RF<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="f"></u></span><b data-psi="f">40</b></span></button>
+            <button class="r-tile" data-ax="r"><span class="t">LR<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="r"></u></span><b data-psi="r">40</b></span></button>
+            <button class="r-tile" data-ax="r"><span class="t">RR<i>PSI</i></span><span class="v"><span class="r-bar"><u data-bar="r"></u></span><b data-psi="r">40</b></span></button>
+          </div>
+          <div class="r-tank"><b id="tankN">150</b><span>TANK<i>PSI</i></span></div>
+          <div class="r-tip">Tap front or rear, then hold ◀ ▶</div>
+          <div class="r-list">
+            <button data-preset="36">Aired Out<small>0 PSI</small></button>
+            <button data-preset="0">Low Cruise<small>40 PSI</small></button>
+            <button data-preset="-10">Lift<small>51 PSI</small></button>
+          </div>
+          <div class="r-tabs" role="tablist">
+            <button role="tab" aria-selected="false" data-view="presets"><svg viewBox="0 0 24 24"><path d="M7 3h10v18l-5-4-5 4z"/></svg>Presets</button>
+            <button role="tab" aria-selected="true" data-view="drive"><svg viewBox="0 0 24 24"><path d="M5 11l1.6-4.6A2 2 0 0 1 8.500 5h7a2 2 0 0 1 1.900 1.400L19 11a2 2 0 0 1 2 2v5h-3v-2H6v2H3v-5a2 2 0 0 1 2-2zm2.200 0h9.600l-1-3H8.200zM7 15.200a1.200 1.200 0 1 0 0-2.400 1.200 1.200 0 0 0 0 2.400zm10 0a1.200 1.200 0 1 0 0-2.400 1.200 1.200 0 0 0 0 2.400z"/></svg>Drive</button>
+            <button role="tab" aria-selected="false" data-view="manual"><svg viewBox="0 0 24 24"><path d="M3 6h10v2H3zm14 0h4v2h-4zM3 11h4v2H3zm8 0h10v2H11zM3 16h12v2H3zm16 0h2v2h-2zM14 4.500h2v5h-2zM8 9.500h2v5H8zm8 5h2v5h-2z"/></svg>Manual</button>
+          </div>
+        </div>
+        <div class="r-keys">
+          <button data-hold="1" aria-label="Lower (hold)"><svg viewBox="0 0 24 24"><path d="M16 5 7 12l9 7"/></svg></button>
+          <div class="r-mid">
+            <button data-preset="36" aria-label="Air out"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></button>
+            <button data-preset="0" aria-label="Drive height"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" style="fill:#f3f3ef"/></svg></button>
+          </div>
+          <button data-hold="-1" aria-label="Raise (hold)"><svg viewBox="0 0 24 24"><path d="M8 5l9 7-9 7"/></svg></button>
+        </div>
+        <div class="r-lbl"><span>DOWN</span><span>AIR OUT</span><span>DRIVE</span><span>UP</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="marq" aria-hidden="true"><div id="marq"></div></div>
+<section><div class="wrap">
+  <div class="doors">
+    <a class="door reveal" href="#/suspension"><img data-img="strut" alt=""><span class="eyebrow">FlyyAir suspension</span><h3>Bag your car</h3><p>Our own struts and kits, from $1,675. Free shipping.</p></a>
+    <a class="door reveal" href="#/performance"><img data-img="rack" alt=""><span class="eyebrow">Performance</span><h3>Alignment for lowered cars</h3><p>In-ground rack. No limit on how low.</p></a>
+    <a class="door g reveal" href="#/giveaway"><span class="eyebrow">Live now</span><h3>Enter the giveaway</h3><p>One tap to enter. Ticket numbers sent instantly.</p></a>
+  </div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+  <div class="bar" style="margin-top:0"><div><span class="eyebrow">Shop</span><h2 style="margin-bottom:0">Fresh in the <em>shop.</em></h2></div><a class="btn ghost" href="#/shop">See everything</a></div>
+  <div class="grid" id="featured"></div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+  <div class="band reveal"><img data-img="m3" alt="Purple BMW M3 on FlyyAir suspension at sunset">
+    <div><span class="eyebrow">Want access to exclusive deals?</span><h3>Get the drop before everyone else.</h3><p class="lead" style="font-size:15px">Sign up for our latest updates and best offers.</p>
+    <form class="sign" data-demo="You're on the list."><input class="field" type="email" placeholder="Email" required><button class="btn">Sign me up</button></form></div>
+  </div>
+</div></section>
+</main>
+<main class="page" data-page="suspension">
+<section><div class="wrap">
+  <div class="phead">
+    <div><span class="eyebrow reveal">FlyyAir suspension</span><h2 class="reveal">Find your kit in <em>three taps.</em></h2>
+    <p class="lead reveal">FlyyAir suspension is built from quality materials for a smooth, comfortable ride, with kits for almost any car. Pick your car, pick your setup, see the price.</p></div>
+    <img class="cut reveal" data-img="struts" alt="FlyyAir air struts">
+  </div>
+  <div class="builder reveal" id="build">
+    <div class="card">
+      <div class="step">1 · Your car</div>
+      <input class="field" id="carQ" placeholder="Search make or model, e.g. Civic" style="margin:0 0 10px">
+      <div class="chips" id="makes"></div><div class="chips" id="models" style="margin-top:8px"></div>
+      <div class="step">2 · Drivetrain</div><div class="chips" id="drives"></div>
+      <div class="step">3 · Kit</div><div class="opts" id="kits"></div>
+      <div class="step">4 · Airline size</div><div class="chips" id="lines"></div>
+      <div class="step">5 · Tank finish <small style="text-transform:none;letter-spacing:0">(not needed with struts only)</small></div><div class="chips" id="tanks"></div>
+      <div class="step">6 · Year &amp; any extra specifications</div><input class="field" id="yr" maxlength="150" placeholder="e.g. 2019, sedan, Si" style="margin:0">
+    </div>
+    <div class="card summary">
+      <div class="tank" id="tank"></div><span class="eyebrow">Your build</span><div class="fit" id="fit"></div>
+      <ul id="lines2"></ul>
+      <div class="total"><span>Total</span><b id="total"></b></div>
+      <button class="btn" id="addKit" style="width:100%;justify-content:center">Add to cart</button>
+      <p class="fine">Free shipping. Pay over time with Affirm at checkout.</p>
+      <p class="fine">The $1,675 struts-only price is from the current site. Other kit and tank prices here are demo figures.</p>
+    </div>
+  </div>
+</div></section>
+</main>
+<main class="page" data-page="performance">
+<section id="rack">
+  <div class="wrap">
+    <div class="phead"><div><span class="eyebrow reveal">Wheel alignment for lowered cars</span>
+    <h2 class="reveal">The rack is <em>in the floor.</em></h2>
+    <p class="lead reveal">Most shops turn slammed cars away because the ramps tear up bumpers and lips. Our alignment rack sits in the ground, so getting on it is damage free and there is no limit on how low your car can be.</p>
+    <p class="reveal" style="margin-top:18px"><a class="btn" href="#/appointment">Book an alignment · $25 deposit</a></p></div>
+    <img class="reveal" data-img="rack" alt="Car on the FlyyAir in-ground alignment rack"></div>
+    <div class="rack-grid">
+      <div class="rack bad reveal">
+        <span class="tag">EVERYWHERE ELSE</span><h3>Drive-on ramps</h3><p>Lip meets ramp. Lip loses.</p>
+        <svg viewBox="0 0 460 150">
+          <path d="M0 132 H460" stroke="#333"/>
+          <path d="M0 132 L0 104 L96 104 L150 132 Z" fill="#1c1c1c" stroke="#3a3a3a"/>
+          <g class="carA"><g transform="scale(.3) translate(0,138)"><use href="#carWheels"/><g transform="translate(0,34)"><use href="#carBody"/></g></g></g>
+          <g class="spark"><path d="M128 118 l-10-12 M134 114 l-2-16 M140 120 l10-12" stroke="#ff8178" stroke-width="2" stroke-linecap="round"/><text x="150" y="40" fill="#ff8178" font-family="monospace" font-size="13" letter-spacing="2">✕ SCRAPES</text></g>
+        </svg>
+      </div>
+      <div class="rack good reveal">
+        <span class="tag">FLYYAIR</span><h3>In-ground rack</h3><p>Roll on. Zero damage.</p>
+        <svg viewBox="0 0 460 150">
+          <path d="M0 132 H460" stroke="#333"/>
+          <rect x="20" y="132" width="240" height="7" rx="2" fill="#9bc61a"/>
+          <g class="carB"><g transform="scale(.3) translate(0,138)"><use href="#carWheels"/><g transform="translate(0,34)"><use href="#carBody"/></g></g></g>
+          <text x="20" y="40" fill="#9bc61a" font-family="monospace" font-size="13" letter-spacing="2">✓ FLUSH WITH THE FLOOR</text>
+        </svg>
+      </div>
+    </div>
+    <div class="band reveal" style="margin-top:18px"><img data-img="crv" alt="Lowered Honda CR-V on the alignment rack">
+      <div><span class="eyebrow">Why it matters</span><h3>Lowered cars need a real alignment.</h3>
+      <p class="lead" style="font-size:15px">Lowering a car changes its camber and toe. Leave it and you chew through tyres and the car wanders. We align lowered and bagged cars every day, on any make or model, and we also handle suspension tuning, fender rolling and brake upgrades.</p>
+      <a class="btn ghost" href="tel:+13477848577">Call (347) 784-8577</a></div></div>
+  </div>
+</section>
+</main>
+<main class="page" data-page="shop">
+<section><div class="wrap">
+  <span class="eyebrow">Free shipping</span><h2>Shop <em>FlyyAir.</em></h2>
+  <p class="lead">Air suspension that is smooth, comfortable, durable and affordable, plus parts and merch.</p>
+  <div class="bar"><div class="chips" id="cats"></div>
+    <select class="field" id="sort" aria-label="Sort"><option value="">Featured</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option><option value="az">Name A–Z</option></select></div>
+  <div class="grid" id="shopGrid"></div>
+</div></section>
+</main>
+<main class="page" data-page="giveaway">
+<section id="give">
+  <div class="wrap">
+    <span class="eyebrow reveal">Giveaway</span>
+    <h2 class="reveal">One tap in. <em>List builds itself.</em></h2>
+    <p class="lead reveal">Entries check out in a single tap, ticket numbers go out instantly, and the entry list fills in on its own. Flip to the owner view to run the draw.</p>
+    <div class="tabs reveal" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="buyer">What customers see</button>
+      <button role="tab" aria-selected="false" data-tab="owner">What you see</button>
+    </div>
+
+    <div class="give buyer" id="buyer">
+      <div class="prize">
+        <img data-img="redcar" alt=""><span class="ph">Prize photo or reel goes here</span>
+        <div>
+          <span class="eyebrow">Sample prize</span>
+          <h3>Full FlyyAir kit<br>+ install</h3>
+          <div class="count" id="count"></div>
+          <div class="live"><i></i><span><b id="liveN">0</b> entries so far</span></div>
+        </div>
+      </div>
+      <div class="card" id="checkout">
+        <div class="step">Pick your entries</div>
+        <div class="bundles" id="bundles"></div>
+        <input class="field" id="who" placeholder="Name" autocomplete="name">
+        <input class="field" id="ig" placeholder="@instagram (so we can tag the winner)">
+        <button class="pay" id="payA">Apple Pay</button>
+        <button class="pay card2" id="payC">Pay with card</button>
+        <p class="fine">Demo only: no payment is taken. No purchase necessary on the live version; a free entry method is included in the official rules.</p>
+      </div>
+    </div>
+
+    <div class="owner" id="owner">
+      <div class="stats">
+        <div class="stat"><b id="sEntries">0</b><small>Entries sold</small></div>
+        <div class="stat"><b id="sBuyers">0</b><small>People entered</small></div>
+        <div class="stat"><b id="sRev">$0</b><small>Revenue</small></div>
+        <div class="stat"><b>0</b><small>Failed payments</small></div>
+      </div>
+      <div class="own-grid">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
+            <span class="eyebrow">Entry list · updates live</span>
+            <button class="btn ghost" id="csv" style="padding:8px 14px;font-size:11px">Export CSV</button>
+          </div>
+          <div class="tbl"><table><thead><tr><th>Tickets</th><th>Name</th><th>Instagram</th><th>Paid</th></tr></thead><tbody id="rows"></tbody></table></div>
+        </div>
+        <div class="card draw">
+          <span class="eyebrow">Draw mode</span>
+          <div class="reel" id="reel">00000</div>
+          <div class="winner" id="winner">Screen-record this or run it on Live.</div>
+          <button class="btn" id="drawBtn" style="margin-top:10px">Draw winner</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<main class="page" data-page="about">
+<section><div class="wrap">
+  <div class="phead"><div><span class="eyebrow">About us</span><h2>Enthusiasts <em>since 2006.</em></h2>
+  <p class="lead">We started with a love of cars in 2006. Over the years we became installers for many well-known brands, then created our own company, FlyyAir Suspensions, dedicated to the upgrades other companies didn't focus on: real customization, and making your car perform better, not just look different.</p>
+  <p style="margin-top:18px"><a class="btn" href="#/suspension">Shop air suspension</a></p></div>
+  <img data-img="install" alt="Car on the lift at the FlyyAir shop" style="max-height:420px;object-fit:cover"></div>
+</div></section><section id="builds" style="padding-top:0">
+  <div class="wrap">
+    <span class="eyebrow reveal">Projects</span>
+    <h2 class="reveal">FlyyAir <em>projects.</em></h2>
+    <p class="lead reveal">Our latest builds. Every car links to the kit it runs and a button to book the same install.</p>
+    <div class="builds reveal" id="tiles"></div>
+  </div>
+</section>
+<section style="padding-top:0"><div class="wrap faq" id="faq">
+  <span class="eyebrow">FAQ</span><h2>Good <em>questions.</em></h2>
+  <details open><summary>How reliable is FlyyAir suspension?</summary><p>Cutting corners on suspension always comes back to bite you. With quality components, proper installation and basic care, a FlyyAir system can easily outlast the life of your vehicle.</p></details>
+  <details><summary>What maintenance does my FlyyAir system need?</summary><p>Not much. Empty your air tank every couple of months, and if you have water traps, drain them at least once a month. Both drain moisture from the system, and both matter less in dry climates. An easy habit: drain the traps while you fill up with gas.</p></details>
+  <details><summary>Do you ship?</summary><p>Yes, with free shipping. See Shipping &amp; Returns for details.</p></details>
+</div></section>
+</main>
+<main class="page" data-page="appointment">
+<section><div class="wrap">
+  <span class="eyebrow">Appointment</span><h2>Book your <em>slot.</em></h2>
+  <p class="lead">Pick a service and a time. A deposit confirms your appointment. It is non-refundable but goes toward the cost of your service.</p>
+  <div class="two">
+    <div class="svcl" id="svc"></div>
+    <div class="card" id="bookCard" style="align-self:start;position:sticky;top:80px">
+      <span class="eyebrow">Your booking</span><div class="fit" id="bkName" style="font-family:var(--display);font-size:30px;text-transform:uppercase;line-height:1;margin-top:6px"></div>
+      <form id="bookForm"><label class="l">Date</label><input class="field" type="date" id="bkDate" required style="margin-top:6px">
+      <label class="l">Time</label><select class="field" id="bkTime" style="margin-top:6px"><option>9:00 AM</option><option>10:30 AM</option><option>12:00 PM</option><option>1:30 PM</option><option>3:00 PM</option><option>4:30 PM</option></select>
+      <label class="l">Name</label><input class="field" required placeholder="Full name" style="margin-top:6px">
+      <label class="l">Your car</label><input class="field" placeholder="Year, make, model" style="margin-top:6px">
+      <button class="pay" id="bkPay">Pay deposit</button></form>
+      <p class="fine">Demo only: no payment is taken. Time slots are sample times.</p>
+    </div>
+  </div>
+</div></section>
+</main>
+<main class="page" data-page="contact">
+<section><div class="wrap">
+  <span class="eyebrow">Contact</span><h2>Come <em>see us.</em></h2>
+  <div class="two">
+    <div class="info"><p><span class="eyebrow">Address</span><br>1542 Ree Ln Unit 1<br>Kissimmee, FL 34741<br><a href="https://www.google.com/maps/search/?api=1&query=1542+Ree+Ln+Unit+1+Kissimmee+FL+34741" target="_blank" rel="noopener">Get directions →</a></p>
+      <p><span class="eyebrow">Phone</span><br><a href="tel:+13477848577">(347) 784-8577</a></p>
+      <p><span class="eyebrow">Follow</span><br><a href="https://www.instagram.com/papiflyy" target="_blank" rel="noopener">@papiflyy on Instagram</a></p>
+      <img data-img="rack" alt="" style="border-radius:16px;border:1px solid var(--line);margin-top:10px"></div>
+    <form class="card" data-demo="Thanks for submitting!">
+      <label class="l" style="margin-top:0">First name *</label><input class="field" required style="margin-top:6px">
+      <label class="l">Last name *</label><input class="field" required style="margin-top:6px">
+      <label class="l">Email *</label><input class="field" type="email" required style="margin-top:6px">
+      <label class="l">Subject</label><input class="field" style="margin-top:6px">
+      <label class="l">Message</label><textarea class="field" style="margin-top:6px"></textarea>
+      <button class="btn" style="margin-top:14px;width:100%;justify-content:center">Send</button></form>
+  </div>
+</div></section>
+</main>
+<main class="page" data-page="warranty">
+<section><div class="wrap">
+  <span class="eyebrow">Warranty</span><h2>Warranty <em>submission.</em></h2>
+  <p class="lead">Tell us what happened and attach a photo or video. We'll get back to you with next steps.</p>
+  <div class="two"><form class="card" data-demo="Warranty request received.">
+    <label class="l" style="margin-top:0">Full name *</label><input class="field" required style="margin-top:6px">
+    <label class="l">Email *</label><input class="field" type="email" required style="margin-top:6px">
+    <label class="l">Order number</label><input class="field" style="margin-top:6px">
+    <label class="l">Product</label><select class="field" style="margin-top:6px"><option>FlyyAir struts</option><option>Air bag</option><option>Management</option><option>Compressor / tank</option><option>Other</option></select>
+    <label class="l">Vehicle</label><input class="field" placeholder="Year, make, model" style="margin-top:6px">
+    <label class="l">What's going on? *</label><textarea class="field" required style="margin-top:6px"></textarea>
+    <label class="l">Photo or video</label><input class="field" type="file" accept="image/*,video/*" style="margin-top:6px">
+    <button class="btn" style="margin-top:14px;width:100%;justify-content:center">Submit claim</button></form>
+    <div class="info"><p><span class="eyebrow">Before you submit</span></p><p style="font-size:15px;color:var(--mute)">Have your order number and a clear photo or short video of the issue ready. It speeds things up.</p><p style="font-size:15px;color:var(--mute)">Rather talk to someone? Call <a href="tel:+13477848577">(347) 784-8577</a>.</p><p class="fine">Demo form: nothing is sent. The fields are a suggested layout, not his current warranty form.</p></div></div>
+</div></section>
+</main><footer><div class="wrap">
+  <img class="logoimg" data-img="logoV" alt="FlyyAir">
+  <div class="big">Static <em>is dead.</em></div>
+  <div class="foot">
+    <div><h4>Shop</h4><p>1542 Ree Ln Unit 1<br>Kissimmee, FL 34741</p></div>
+    <div><h4>Call</h4><p>(347) 784-8577</p></div>
+    <div><h4>Follow</h4><p>@papiflyy</p></div>
+  </div>
+  <div class="flinks"><a href="#/about">FAQ</a><a href="#/about">Shipping &amp; Returns</a><a href="#/about">Terms &amp; Conditions</a><a href="#/warranty">Warranty submission</a></div>
+  <p class="disc">Concept demo prepared by SignalPeak Marketing. Not the live FlyyAir Performance website. Giveaway data, prize and names are sample content; prices are from the current site except where marked as demo.</p>
+</div></footer><div class="toast" id="toast"></div>
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- air ride ---------- */
+const MIN=-10, MAX=36;
+const air={f:0,r:0,tf:0,tr:0};
+const body=$('#body'), hero=$('#hero'), shadow=$('#shadow'), glow=$('#glow');
+let held=null, sel='a', tank=150, actx=null, hiss=null, soundOn=true;
+const remote=$('#remote'), rscreen=$('#rscreen');
+function psi(d){return Math.max(0,Math.round(40*(1-d/MAX)))}
+function modeName(){
+  if(rscreen.dataset.view==='manual')return 'Manual';
+  const d=(air.tf+air.tr)/2; if(Math.abs(air.tf-air.tr)>2)return 'Custom';
+  return d>MAX-2?'Aired Out':d<-6?'Lift':Math.abs(d)<2?'Low Cruise':'Custom';
+}
+function render(){
+  const dy=(air.f+air.r)/2, ang=Math.atan((air.r-air.f)/530)*180/Math.PI;
+  body.setAttribute('transform',`translate(0 ${dy.toFixed(2)}) rotate(${ang.toFixed(3)} 500 262)`);
+  for(const k of ['f','r']){const v=psi(air[k]);
+    $$(`[data-psi=${k}]`).forEach(e=>e.textContent=v); $$(`[data-bar=${k}]`).forEach(e=>e.style.height=Math.min(100,v/55*100)+'%')}
+  $('#rmode').textContent=modeName(); $('#tankN').textContent=Math.round(tank);
+  $$('[data-preset]').forEach(b=>b.classList.toggle('on',Math.abs(air.tf-b.dataset.preset)<1&&Math.abs(air.tr-b.dataset.preset)<1));
+  const low=Math.max(0,dy)/MAX;
+  shadow.setAttribute('opacity',(.45+low*.45).toFixed(2));
+  glow.setAttribute('opacity',(low*.55).toFixed(2));
+  hero.classList.toggle('slammed',dy>MAX-3);
+}
+function tick(){
+  if(held){const step=held*.55;
+    if(sel!=='r')air.tf=Math.min(MAX,Math.max(MIN,air.tf+step));
+    if(sel!=='f')air.tr=Math.min(MAX,Math.max(MIN,air.tr+step));}
+  const df=air.tf-air.f, dr=air.tr-air.r, mv=Math.abs(df)+Math.abs(dr);
+  air.f+=df*.12; air.r+=dr*.12;
+  const up=Math.max(0,-df)+Math.max(0,-dr), t0=tank;
+  tank=Math.max(95,Math.min(150,tank-up*.05+(mv<.6?.12:0)));
+  if(mv>.02||Math.round(t0)!==Math.round(tank))render();
+  remote.classList.toggle('moving',mv>.6);
+  if(hiss)hiss.gain.setTargetAtTime(mv>.6&&soundOn?.16:0,actx.currentTime,.05);
+  requestAnimationFrame(tick);
+}
+function audio(){
+  if(actx||!soundOn)return;
+  try{
+    actx=new (window.AudioContext||window.webkitAudioContext)();
+    const buf=actx.createBuffer(1,actx.sampleRate*2,actx.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    const src=actx.createBufferSource(); src.buffer=buf; src.loop=true;
+    const bp=actx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=5200; bp.Q.value=.7;
+    hiss=actx.createGain(); hiss.gain.value=0;
+    src.connect(bp).connect(hiss).connect(actx.destination); src.start();
+  }catch(e){}
+}
+const hideHint=()=>$('#hint').style.visibility='hidden';
+$$('[data-hold]').forEach(b=>{
+  const on=e=>{e.preventDefault();audio();held=+b.dataset.hold;b.classList.add('on');hideHint()};
+  const off=()=>{if(b.classList.contains('on'))held=null;b.classList.remove('on')};
+  b.addEventListener('pointerdown',on); ['pointerup','pointerleave','pointercancel'].forEach(t=>b.addEventListener(t,off));
+  b.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')on(e)}); b.addEventListener('keyup',off);
+});
+$$('[data-preset]').forEach(b=>b.onclick=()=>{audio();air.tf=air.tr=+b.dataset.preset;hideHint();render()});
+function view(v){
+  rscreen.dataset.view=v; $$('.r-tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===v));
+  if(v!=='manual'){sel='a';$$('.r-tile').forEach(t=>t.classList.remove('sel'))}
+  else pickAx('f');
+  render();
+}
+function pickAx(a){sel=a;$$('.r-tile').forEach(t=>t.classList.toggle('sel',t.dataset.ax===a))}
+$$('.r-tabs button').forEach(b=>b.onclick=()=>view(b.dataset.view));
+$$('.r-tile').forEach(t=>t.onclick=()=>{if(rscreen.dataset.view!=='manual')view('manual');pickAx(t.dataset.ax)});
+$('#snd').onclick=e=>{soundOn=!soundOn;e.currentTarget.setAttribute('aria-pressed',soundOn)};
+render(); requestAnimationFrame(tick);
+
+/* ---------- loader ---------- */
+(function(){
+  const fill=$('#gFill'), num=$('#gNum'), t0=performance.now(), dur=reduce?200:1500;
+  (function step(t){
+    const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3);
+    fill.style.strokeDasharray=`${424*e} 566`; num.textContent=Math.round(100*e);
+    if(p<1)requestAnimationFrame(step);
+    else setTimeout(()=>{$('#loader').classList.add('done');setTimeout(()=>{air.tf=air.tr=MAX},650)},250);
+  })(t0);
+})();
+
+/* ---------- images ---------- */
+const IMG=/*IMAGES*/;
+$$('[data-img]').forEach(e=>e.src=IMG[e.dataset.img]);
+const usd=n=>'$'+n.toLocaleString('en-US');
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
+let cart=0; function addCart(n){cart++;$('#cartN').textContent=cart;toast(n+' added to cart')}
+
+/* ---------- marquee ---------- */
+const words=['Static is dead','In-ground alignment rack','FlyyAir suspension','Kissimmee, FL','No limit on how low','Free shipping','Enthusiasts since 2006'];
+$('#marq').innerHTML=[...words,...words,...words,...words].map(w=>`<span>${w} <i>✦</i></span>`).join('');
+
+/* ---------- shop ---------- */
+const products=[
+ ['alp4','ALP4 Management','Management',1775,1],['strut','Full Assembly Replacement Strut','Parts',499,1],['links','2022–2026 MDX Type S Lowering Links','Parts',425,0],
+ ['shirt','G80 BMW M3 Oversize Shirt','Merch',45,0],['tophat','Top Hats (Pair)','Parts',299,0],['rear','Rear Shock Assembly (No Bag)','Parts',550,0],
+ ['bag','Individual Bag','Parts',225,0],['shock','Replacement Shock','Parts',250,0],['line','Steel Braided Line','Parts',25,0],
+ ['frame','FlyyAir License Plate Frame','Merch',20,1],['key','FlyyAir Keychain','Merch',20,0],['fresh','FlyyAir Air Freshener','Merch',15,0],['magnet','FlyyAir Remote Magnet','Merch',15,0],
+ ['mgmt','Airlift Management Kit','Management',null,0],['bc','BC Coilovers','Parts',null,0],['bearing','Upper Top Hat Bearing','Parts',null,0],['ring','Locking Ring','Parts',null,0],
+ ['install','Airbag Install','Services',null,0],['m3','FLYY M3','Merch',-1,0],['tee','Limited 8th Gen Civic Graphic Tee','Merch',-1,0],['manifold','FlyyAir Manifold Cover','Parts',-1,0]];
+const card=p=>`<div class="prod"><div class="ph2"><img src="${IMG[p[0]]}" alt="${p[1]}" loading="lazy">${p[3]===-1?'<span class="out">OUT OF STOCK</span>':''}</div><div class="in"><h4>${p[1]}</h4><div class="row"><span class="pr">${p[3]===-1?'Sold out':p[3]===null?'See options':(p[4]?'From ':'')+usd(p[3])}</span><button data-add="${p[1]}" ${p[3]===-1?'disabled':''}>${p[3]===null?'View':'Add'}</button></div></div></div>`;
+let cat='All';
+function drawShop(){
+  const cats=['All','Parts','Management','Merch','Services'];
+  $('#cats').innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-cat="${c}">${c}</button>`).join('');
+  let l=products.filter(p=>cat==='All'||p[2]===cat); const s=$('#sort').value, v=p=>p[3]>0?p[3]:1e9;
+  if(s==='lo')l=[...l].sort((a,b)=>v(a)-v(b)); if(s==='hi')l=[...l].sort((a,b)=>(b[3]>0?b[3]:-1)-(a[3]>0?a[3]:-1)); if(s==='az')l=[...l].sort((a,b)=>a[1].localeCompare(b[1]));
+  $('#shopGrid').innerHTML=l.map(card).join('');
+}
+$('#cats').onclick=e=>{const b=e.target.closest('[data-cat]');if(b){cat=b.dataset.cat;drawShop()}};
+$('#sort').onchange=drawShop; drawShop();
+$('#featured').innerHTML=products.slice(0,4).map(card).join('');
+document.addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(b&&!b.disabled)addCart(b.dataset.add)});
+
+/* ---------- kit builder ---------- */
+const cars={Acura:['ILX','Integra','MDX','CL','Legend','NSX'],Audi:['A3','A4','A5','A6','A7','A8','Allroad'],BMW:['1 Series','2 Series','3 Series','4 Series','5 Series','M2','M3','M4','M5'],Chevrolet:['Camaro','Corvette','Cruze','Malibu','Impala / Impala SS'],Dodge:['Challenger','Charger','Dart','Durango','Magnum'],Ford:['Mustang','Focus / RS / ST','Fiesta / Fiesta ST','Fusion','Explorer'],Honda:['Accord','Civic / Civic Si','Civic Type R','CR-V','CR-Z','Fit','Element','Odyssey'],Infiniti:['G35','G37','M35 / M37','FX'],Lexus:['IS / IS F','GS / GS F','LS','ES','LC'],Nissan:['350Z','370Z','Altima','Maxima','GT-R'],Subaru:['BRZ','Impreza','Legacy','Forester','Crosstrek'],Tesla:['Model 3','Model S','Model X','Model Y'],Toyota:['Camry','Corolla','Avalon','C-HR','Celica'],Volkswagen:['Golf','Jetta','CC','Beetle','Atlas']};
+const kits=[['FlyyAir Performance Struts Only','Bring your own management',1675],['Struts & Airlift 3P, Single Compressor','Pressure-based presets from the controller or your phone',3650],['Struts & Airlift 3P, Dual Compressor','Fastest fill, built for daily use',3950]];
+const tanks=[['Black','#111',0],['Chrome','linear-gradient(#f4f4f4,#8b8b8b)',120],['Red','#c1121f',80],['White','#f1f1ee',80],['Gold','linear-gradient(#f7d774,#a67c00)',150],['Oil Slick','linear-gradient(90deg,#3a1c71,#0f9b8e,#d76d77,#ffaf7b)',220]];
+const pick={make:'Honda',model:'Civic / Civic Si',drive:'FWD',kit:0,line:'1/4”',tank:0,q:''};
+const chip=(k,v,on)=>`<button class="chip" aria-pressed="${on}" data-${k}="${v}">${v}</button>`;
+function drawBuilder(){
+  const q=pick.q.toLowerCase(), mk=Object.keys(cars).filter(m=>!q||m.toLowerCase().includes(q)||cars[m].some(x=>x.toLowerCase().includes(q)));
+  if(q&&mk.length&&!mk.includes(pick.make)){pick.make=mk[0];pick.model=(cars[mk[0]].find(x=>x.toLowerCase().includes(q))||cars[mk[0]][0])}
+  $('#makes').innerHTML=mk.map(m=>chip('make',m,m===pick.make)).join('')||'<span class="fine">No match. Call us and we will check fitment.</span>';
+  $('#models').innerHTML=cars[pick.make].filter(m=>!q||pick.make.toLowerCase().includes(q)||m.toLowerCase().includes(q)).map(m=>chip('model',m,m===pick.model)).join('');
+  $('#drives').innerHTML=['AWD','FWD','RWD'].map(d=>chip('drive',d,d===pick.drive)).join('');
+  $('#lines').innerHTML=['1/4”','3/8”'].map(d=>chip('line',d,d===pick.line)).join('');
+  $('#kits').innerHTML=kits.map((k,i)=>`<button class="opt" aria-pressed="${i===pick.kit}" data-kit="${i}"><span>${k[0]}<small>${k[1]}</small></span><b>${i?'':'From '}${usd(k[2])}</b></button>`).join('');
+  $('#tanks').innerHTML=tanks.map((t,i)=>`<button class="sw" title="${t[0]}" aria-label="${t[0]} tank" aria-pressed="${i===pick.tank}" data-tank="${i}" style="background:${t[1]}"></button>`).join('');
+  const k=kits[pick.kit], t=pick.kit?tanks[pick.tank]:['No',  '#1a1a1a',0];
+  $('#fit').textContent=pick.make+' '+pick.model; $('#tank').style.background=t[1]; $('#tanks').style.opacity=pick.kit?1:.35;
+  $('#lines2').innerHTML=`<li><span>${k[0]}</span><span>${usd(k[2])}</span></li><li><span>${pick.drive} · ${pick.line} line</span><span>Included</span></li><li><span>${t[0]} tank</span><span>${t[2]?'+'+usd(t[2]):pick.kit?'Included':'n/a'}</span></li><li><span>Shipping</span><span>Free</span></li>`;
+  $('#total').textContent=usd(k[2]+t[2]);
+}
+$('#build').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return; const d=b.dataset;
+  if(d.make){pick.make=d.make;pick.model=cars[d.make][0]} else if(d.model)pick.model=d.model; else if(d.drive)pick.drive=d.drive; else if(d.line)pick.line=d.line;
+  else if(d.kit)pick.kit=+d.kit; else if(d.tank)pick.tank=+d.tank; else return;
+  drawBuilder();
+});
+$('#carQ').oninput=e=>{pick.q=e.target.value.trim();drawBuilder()};
+$('#addKit').onclick=()=>addCart(pick.make+' '+pick.model+' kit');
+drawBuilder();
+
+/* ---------- appointment ---------- */
+const services=[['Wheel Alignment','30 min',25],['Air Suspension Installation','2 hr',99],['Coilover / Springs Installation','2 hr',99],['Suspension Tuning','1 hr',25],['Fender Roll','1 hr',25],['AirRide Maintenance','1 hr',15],['Camber Kit / Suspension Components','1 hr',50],['Brake Services','1 hr',50],['Performance Install','1 hr',50]];
+let svcSel=0;
+function drawSvc(){
+  $('#svc').innerHTML=services.map((s,i)=>`<button class="opt" aria-pressed="${i===svcSel}" data-svc="${i}"><span>${s[0]}<small>${s[1]}</small></span><b>${usd(s[2])} deposit</b></button>`).join('');
+  $('#bkName').textContent=services[svcSel][0]; const p=$('#bkPay'); if(p)p.textContent=`Pay ${usd(services[svcSel][2])} deposit`;
+}
+$('#svc').onclick=e=>{const b=e.target.closest('[data-svc]');if(b){svcSel=+b.dataset.svc;drawSvc()}};
+$('#bkDate').min=new Date().toISOString().slice(0,10);
+$('#bookForm').onsubmit=e=>{e.preventDefault();const s=services[svcSel];
+  $('#bookCard').innerHTML=`<div class="ok"><div class="tick">✓</div><h3>You're booked.</h3><p style="color:var(--mute)">${s[0]}</p><div class="tix">${$('#bkDate').value} · ${$('#bkTime').value}</div><p style="color:var(--mute);font-size:14px">${usd(s[2])} deposit paid and applied to your service. Confirmation sent by text and email.</p></div>`};
+drawSvc();
+
+/* ---------- demo forms ---------- */
+$$('form[data-demo]').forEach(f=>f.onsubmit=e=>{e.preventDefault();toast(f.dataset.demo);f.reset()});
+
+/* ---------- giveaway ---------- */
+const bundles=[[1,10,''],[5,40,''],[15,100,'POPULAR'],[40,200,'BEST VALUE']];
+let bsel=2, entries=[], next=1;
+const names=['Marcus R.','Dani V.','Chris P.','Alyssa M.','Jay T.','Luis G.','Bri K.','Tony S.','Nate W.','Kiara J.','Omar H.','Steph L.','Rico D.','Mia C.','Zay B.','Eli F.','Tasha N.','Vic A.','Cam O.','Jules E.','Andre Q.','Nina Y.','Sam U.','Devon I.'];
+const pad=n=>String(n).padStart(5,'0');
+function addEntry(name,ig,bi,isNew){
+  const [qty,price]=bundles[bi], from=next; next+=qty;
+  const e={from,to:next-1,name,ig,price,qty}; entries.push(e);
+  const tr=document.createElement('tr'); if(isNew)tr.className='new'; e.tr=tr;
+  tr.innerHTML=`<td class="m">${pad(from)}${qty>1?'–'+pad(e.to):''}</td><td></td><td></td><td>${usd(price)}</td>`;
+  tr.children[1].textContent=name; tr.children[2].textContent=ig;
+  $('#rows').prepend(tr); stats(); return e;
+}
+function stats(){
+  const n=next-1; $('#liveN').textContent=n.toLocaleString(); $('#sEntries').textContent=n.toLocaleString();
+  $('#sBuyers').textContent=entries.length; $('#sRev').textContent=usd(entries.reduce((a,e)=>a+e.price,0));
+}
+names.forEach((n,i)=>addEntry(n,'@'+n.toLowerCase().replace(/[^a-z]/g,'')+(i*7%90+10),[2,1,3,0,2,1][i%6]));
+let auto=0;
+setInterval(()=>{if(document.hidden||drawing)return;const n=names[(auto*5+3)%names.length];auto++;addEntry(n.replace(/\w\.$/,c=>'ABCDEFGHJK'[auto%10]+'.'),'@fan'+(1000+auto*37),[0,1,2,1][auto%4],true)},4200);
+
+$('#bundles').innerHTML=bundles.map((b,i)=>`<button class="bundle" data-b="${i}" aria-pressed="${i===bsel}">${b[2]?`<em>${b[2]}</em>`:''}<b>${b[0]}</b><small>${b[0]>1?'entries':'entry'} · ${usd(b[1])}</small></button>`).join('');
+$('#bundles').onclick=e=>{const b=e.target.closest('[data-b]');if(!b)return;bsel=+b.dataset.b;$$('.bundle').forEach((x,i)=>x.setAttribute('aria-pressed',i===bsel))};
+function pay(btn){
+  const name=$('#who').value.trim()||'You', ig=$('#ig').value.trim()||'@you';
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  setTimeout(()=>{
+    const e=addEntry(name,ig,bsel,true);
+    $('#checkout').innerHTML=`<div class="ok"><div class="tick">✓</div><h3>You're in.</h3><p style="color:var(--mute)">Paid in one tap. Your ticket numbers:</p><div class="tix">#${pad(e.from)}${e.qty>1?' – #'+pad(e.to):''}</div><p style="color:var(--mute);font-size:14px">Sent to your email and phone. You are already on the entry list.</p><button class="btn ghost" style="margin-top:18px" id="see">See the owner view →</button></div>`;
+    $('#see').onclick=()=>tab('owner');
+  },900);
+}
+$('#payA').onclick=e=>pay(e.currentTarget); $('#payC').onclick=e=>pay(e.currentTarget);
+
+function tab(t){
+  $$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  $('#buyer').classList.toggle('hide',t!=='buyer'); $('#owner').classList.toggle('show',t==='owner');
+}
+$$('.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+
+const end=Date.now()+6*864e5+4*36e5+13*6e4;
+function clock(){
+  let s=Math.max(0,Math.floor((end-Date.now())/1000));
+  const v=[Math.floor(s/86400),Math.floor(s%86400/3600),Math.floor(s%3600/60),s%60], l=['DAYS','HRS','MIN','SEC'];
+  $('#count').innerHTML=v.map((x,i)=>`<div>${String(x).padStart(2,'0')}<small>${l[i]}</small></div>`).join('');
+}
+clock(); setInterval(clock,1000);
+
+$('#csv').onclick=()=>{
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const csv=['ticket_from,ticket_to,name,instagram,paid',...entries.map(e=>[pad(e.from),pad(e.to),q(e.name),q(e.ig),e.price].join(','))].join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='giveaway-entries.csv'; a.click();
+};
+
+let drawing=false;
+$('#drawBtn').onclick=()=>{
+  if(drawing)return; drawing=true; $$('tr.win').forEach(r=>r.classList.remove('win'));
+  const total=next-1, win=1+Math.floor(Math.random()*total), w=entries.find(e=>win>=e.from&&win<=e.to);
+  const reel=$('#reel'), t0=performance.now(), dur=reduce?300:3200; $('#winner').textContent='Drawing from '+total.toLocaleString()+' entries…';
+  (function spin(t){
+    const p=(t-t0)/dur;
+    if(p<1){const s=pad(win); reel.textContent=[...s].map((c,i)=>p>.45+i*.11?c:Math.floor(Math.random()*10)).join(''); requestAnimationFrame(spin)}
+    else{reel.textContent=pad(win); const el=$('#winner'); el.innerHTML='Winner<b></b><span></span>'; el.children[0].textContent=w.name; el.children[1].textContent=w.ig+' · ticket #'+pad(win);
+      w.tr.classList.add('win'); w.tr.scrollIntoView({block:'nearest'}); confetti(); drawing=false; $('#drawBtn').textContent='Draw again'}
+  })(t0);
+};
+function confetti(){
+  if(reduce)return;
+  const box=document.createElement('div'); box.id='confBox'; document.body.appendChild(box);
+  for(let i=0;i<70;i++){const c=document.createElement('i'); c.className='conf';
+    c.style.cssText=`left:${Math.random()*100}vw;background:${['#9bc61a','#f3f3ef','#80a315','#e5372b'][i%4]};animation-duration:${1.6+Math.random()*1.8}s;animation-delay:${Math.random()*.4}s`;
+    box.appendChild(c)}
+  setTimeout(()=>box.remove(),4400);
+}
+
+/* ---------- projects ---------- */
+const tiles=[['w t','FLYY M3','Full kit · dual compressor','m3'],['','Type S','Lowered on FlyyAir','redcar'],['','CR-V','Aligned on the in-ground rack','crv'],['w','Shop days','Install bay','install'],['','7 Series','On the rack','rack'],['','Your car','Book the same install','']];
+$('#tiles').innerHTML=tiles.map(t=>`<a class="tile ${t[0]}" href="#/suspension">${t[3]?`<img src="${IMG[t[3]]}" alt="">`:'<span class="ph">[ Photo / reel from Instagram ]</span>'}<b>${t[1]}</b><small>${t[2]} →</small></a>`).join('');
+
+/* ---------- router ---------- */
+function route(){
+  let p=(location.hash.match(/^#\/([a-z]*)/)||[])[1]||'home'; if(!$(`.page[data-page="${p}"]`))p='home';
+  $$('.page').forEach(e=>e.classList.toggle('on',e.dataset.page===p));
+  $$('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===p));
+  $('#menu').classList.remove('open'); scrollTo(0,0);
+}
+addEventListener('hashchange',route); route();
+$('#burger').onclick=()=>$('#menu').classList.add('open'); $('#menuX').onclick=()=>$('#menu').classList.remove('open');
+
+/* ---------- reveal ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+$$('.reveal').forEach(e=>io.observe(e));
+</script>
+</body>
+</html>
