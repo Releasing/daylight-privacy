@@ -38,6 +38,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
   "postgres: requires KAIROS_TEST_PG_DSN (run on VPS)",
 ]
