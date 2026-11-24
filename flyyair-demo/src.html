@@ -597,7 +597,7 @@ video{display:block;max-width:100%;background:#000}
       <figure><video data-vid="coilover" data-img="v_coilover" muted loop playsinline preload="none" ></video><figcaption>Coilovers and springs</figcaption></figure>
       <figure><video data-vid="balancer" data-img="v_balancer" muted loop playsinline preload="none" ></video><figcaption>In the bay</figcaption></figure>
     </div>
-    <div class="band reveal" style="margin-top:18px"><img data-img="racks15" alt="Lowered Nissan Silvia on the alignment rack">
+    <div class="band reveal" style="margin-top:18px"><img data-img="kia" alt="White sedan on the alignment rack in front of the FlyyAir logo wall">
       <div><span class="eyebrow">Why it matters</span><h3>Lowered cars need a real alignment.</h3>
       <p class="lead" style="font-size:15px">Lowering a car changes its camber and toe. Leave it and you chew through tyres and the car wanders. We align lowered and bagged cars every day, on any make or model, and we also handle suspension tuning, fender rolling and brake upgrades.</p>
       <a class="btn ghost" href="tel:+13477848577">Call (347) 784-8577</a></div></div>
@@ -677,7 +677,14 @@ video{display:block;max-width:100%;background:#000}
   <p class="lead">We started with a love of cars in 2006. Over the years we became installers for many well-known brands, then created our own company, FlyyAir Suspensions, dedicated to the upgrades other companies didn't focus on: real customization, and making your car perform better, not just look different.</p>
   <p style="margin-top:18px"><a class="btn" href="#/suspension">Shop air suspension</a></p></div>
   <video data-vid="install" data-img="v_install" muted loop playsinline preload="none" aria-label="BMW wagon on the lift during an install"></video></div>
-</div></section><section id="builds" style="padding-top:0">
+</div></section><section style="padding-top:0"><div class="wrap">
+  <div class="band reveal"><img data-img="tech" alt="Technician fitting a wheel at the FlyyAir shop">
+    <div><span class="eyebrow">In-house</span><h3>We do the work ourselves.</h3>
+    <p class="lead" style="font-size:15px">We spent years as installers for well-known brands before building our own. Every FlyyAir install, alignment and tune happens here in our Kissimmee shop.</p>
+    <a class="btn" href="#/appointment">Book an install</a></div>
+  </div>
+</div></section>
+<section id="builds" style="padding-top:0">
   <div class="wrap">
     <span class="eyebrow reveal">Projects</span>
     <h2 class="reveal">FlyyAir <em>projects.</em></h2>
@@ -717,7 +724,7 @@ video{display:block;max-width:100%;background:#000}
     <div class="info"><p><span class="eyebrow">Address</span><br>1542 Ree Ln Unit 1<br>Kissimmee, FL 34741<br><a href="https://www.google.com/maps/search/?api=1&query=1542+Ree+Ln+Unit+1+Kissimmee+FL+34741" target="_blank" rel="noopener">Get directions →</a></p>
       <p><span class="eyebrow">Phone</span><br><a href="tel:+13477848577">(347) 784-8577</a></p>
       <p><span class="eyebrow">Follow</span><br><a href="https://www.instagram.com/papiflyy" target="_blank" rel="noopener">@papiflyy on Instagram</a></p>
-      <img data-img="rackm3" alt="" style="border-radius:16px;border:1px solid var(--line);margin-top:10px"></div>
+      <img data-img="kia" alt="" style="border-radius:16px;border:1px solid var(--line);margin-top:10px"></div>
     <form class="card" data-demo="Thanks for submitting!">
       <label class="l" style="margin-top:0">First name *</label><input class="field" required style="margin-top:6px">
       <label class="l">Last name *</label><input class="field" required style="margin-top:6px">
@@ -995,7 +1002,7 @@ function confetti(){
 }
 
 /* ---------- projects ---------- */
-const tiles=[['w t','E63 S Wagon','Aired out in the shop','wagon'],['','G80 M3','Aired out','m3gas'],['','Civic Type R','On FlyyAir','typer'],['w','MDX Type S','On FlyyAir','mdx'],['','TLX','Aired out','tlx'],['','G80 M3','Rooftop','m3roof'],['w','G80 M3','Rear three-quarter','m3rear'],['','FLYY M3','Sunset','m3'],['','G80 M3','Doors open','m3doors'],['w','G80 M3','On the alignment rack','rackm3'],['','S15 Silvia','On the alignment rack','racks15'],['','CR-V','Aligned','crv']];
+const tiles=[['w t','E63 S Wagon','Aired out in the shop','wagon'],['','G80 M3','Aired out','m3gas'],['','Civic Type R','On FlyyAir','typer'],['w','MDX Type S','On FlyyAir','mdx'],['','TLX','Aired out','tlx'],['','G80 M3','Rooftop','m3roof'],['w','G80 M3','Rear three-quarter','m3rear'],['','FLYY M3','Sunset','m3'],['','G80 M3','Doors open','m3doors'],['w','G80 M3','On the alignment rack','rackm3'],['','S15 Silvia','On the alignment rack','racks15'],['','CR-V','Aligned','crv'],['w','M5 Touring','On the alignment rack','m5rack'],['','GT-R','On the flush rack','gtr'],['','WRX','On the flush rack','wrx'],['','K5','On the alignment rack','kia'],['w','S2000','Coilover install','s2klift'],['','M5 Touring','On the lift','m5rear']];
 $('#tiles').innerHTML=tiles.map(t=>`<a class="tile ${t[0]}" href="#/suspension">${t[3]?`<img src="${IMG[t[3]]}" alt="">`:'<span class="ph">[ Photo / reel from Instagram ]</span>'}<b>${t[1]}</b><small>${t[2]} →</small></a>`).join('');
 
 /* ---------- router ---------- */
@@ -1013,7 +1020,7 @@ addEventListener('scroll',psiTick,{passive:true});
 addEventListener('hashchange',route); route();
 
 /* ---------- filmstrip ---------- */
-const film=['wagon','m3gas','racks15','typer','mdx','rackm3','tlx','m3roof','m3rear','m3shop'];
+const film=['wagon','gtr','m3gas','racks15','m5rack','typer','wrx','mdx','rackm3','kia','tlx','m3roof','s2klift','m3rear'];
 $('#strip').innerHTML=[...film,...film].map(k=>`<img src="${IMG[k]}" alt="" loading="lazy">`).join('');
 
 /* ---------- tilt ---------- */
