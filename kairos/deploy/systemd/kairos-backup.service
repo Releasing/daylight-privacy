@@ -1,0 +1,6 @@
+[Unit]
+Description=Kairos encrypted backup
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/kairos-v11/deploy/backup.sh

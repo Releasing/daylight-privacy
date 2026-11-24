@@ -1,0 +1,25 @@
+Metadata-Version: 2.4
+Name: kairos
+Version: 11.2.0
+Summary: Kairos — paper-first BTC 15-minute Kalshi research and execution engine
+Requires-Python: >=3.12
+Requires-Dist: fastapi==0.115.14
+Requires-Dist: uvicorn[standard]==0.32.1
+Requires-Dist: websockets==13.1
+Requires-Dist: httpx==0.27.2
+Requires-Dist: numpy==2.1.3
+Requires-Dist: scipy==1.14.1
+Requires-Dist: scikit-learn==1.5.2
+Requires-Dist: lightgbm==4.5.0
+Requires-Dist: pyarrow==18.1.0
+Requires-Dist: polars==1.12.0
+Requires-Dist: sqlalchemy==2.0.58
+Requires-Dist: psycopg[binary]==3.2.13
+Requires-Dist: cryptography<51,>=43.0.3
+Requires-Dist: pywebpush==2.0.1
+Requires-Dist: pydantic==2.9.2
+Requires-Dist: pyotp==2.9.0
+Requires-Dist: argon2-cffi==23.1.0
+Provides-Extra: test
+Requires-Dist: pytest==8.3.5; extra == "test"
+Requires-Dist: pytest-asyncio==0.24.0; extra == "test"

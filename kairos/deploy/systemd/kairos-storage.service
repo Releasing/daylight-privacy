@@ -1,0 +1,9 @@
+[Unit]
+Description=Kairos storage pressure policy (60/70/80/90%)
+
+[Service]
+Type=oneshot
+User=kairosv11
+EnvironmentFile=/etc/kairos-v11/kairos.env
+ExecStart=/opt/kairos-v11/current/.venv/bin/kairos storage-maintain
+Nice=10
