@@ -140,7 +140,7 @@ class ScalpOutcome:
 
 
 def simulate_scalp(ctx: MarketContext, side: str, entry: float, target_c: int, stop_c: int, horizon_s: int,
-                   qty: int, exit_depth: float, n_paths: int = 2000, seed: int = 7, vol_mult: float = 1.0,
+                   qty: int, exit_depth: float, n_paths: int = 800, seed: int = 7, vol_mult: float = 1.0,
                    spread_mult: float = 1.0, drift_mult: float = 1.0) -> ScalpOutcome | None:
     if ctx.spot is None or not ctx.sigma_log_per_s or horizon_s <= 0:
         return None

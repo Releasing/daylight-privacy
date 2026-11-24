@@ -93,7 +93,10 @@ class Ledger:
 
     # ---- fills -------------------------------------------------------------------------------
     def apply_fill(self, fill_id: str, ticker: str, side: str, action: str, qty: Decimal, price: Decimal, fee: Decimal,
-                   ts: float, origin: str = "bot", strategy: str = "", sell_reservation: bool = False) -> list[Realization]:
+                   ts: float, origin: str = "bot", strategy: str = "", sell_reservation: bool = False,
+                   prefer_origin: str | None = None) -> list[Realization]:
+        """``prefer_origin`` makes sells consume that origin's lots first (bot exits never take manual lots
+        before bot lots; p.135)."""
         if fill_id in self.seen_fills:
             return []  # duplicate event
         if qty <= 0 or not (ZERO <= price <= ONE) or fee < 0:
@@ -121,6 +124,8 @@ class Ledger:
                 p.fees_paid += fee
         elif action == "sell":
             p = self.pos(ticker, side)
+            if prefer_origin:
+                p.lots.sort(key=lambda l: l.origin != prefer_origin)  # stable: FIFO within origin
             out.extend(self._sell(p, qty, price, fee, ts, "sell", origin, strategy, sell_reservation))
         else:
             raise LedgerError("action")
@@ -191,6 +196,10 @@ class Ledger:
     # ---- views ---------------------------------------------------------------------------------
     def open_positions(self) -> list[Position]:
         return [p for p in self.positions.values() if p.qty > 0]
+
+    def qty_by_origin(self, ticker: str, side: str, origin: str) -> Decimal:
+        p = self.positions.get((ticker, side))
+        return sum((l.qty for l in p.lots if l.origin == origin), ZERO) if p else ZERO
 
     def worst_case_exposure(self) -> dict[str, Decimal]:
         out: dict[str, Decimal] = {}

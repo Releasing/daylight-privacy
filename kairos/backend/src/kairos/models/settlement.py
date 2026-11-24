@@ -124,11 +124,19 @@ class SettlementModel:
         pre_steps = int(max(0, math.ceil(win_start - x.now)))  # seconds before averaging window starts
         determined = not future_idx and not missing_past
         n_future = len(future_idx)
-        z = self._innovations(rng, pre_steps + n_future)
-        log_inc = x.drift_per_s + sigma * z  # per-second log returns
-        cum = np.cumsum(log_inc, axis=1) if z.shape[1] else np.zeros((self.n, 0))
+        if self.model == "gaussian" and pre_steps > 0:
+            # exact aggregation: the sum of pre-window iid Gaussian steps is one Gaussian draw (fast lane)
+            pre = (x.drift_per_s * pre_steps + sigma * math.sqrt(pre_steps) * rng.standard_normal(self.n))[:, None]
+            z = self._innovations(rng, n_future)
+            log_inc = np.concatenate([pre, x.drift_per_s + sigma * z], axis=1)
+            offset = 1
+        else:
+            z = self._innovations(rng, pre_steps + n_future)
+            log_inc = x.drift_per_s + sigma * z  # per-second log returns
+            offset = pre_steps
+        cum = np.cumsum(log_inc, axis=1) if log_inc.shape[1] else np.zeros((self.n, 0))
         paths = x.spot * np.exp(cum)  # proxy price at each future second
-        fut_vals = paths[:, pre_steps:] if n_future else np.zeros((self.n, 0))
+        fut_vals = paths[:, offset:] if n_future else np.zeros((self.n, 0))
         obs_sum = sum(observed.values())
         # missing past seconds: filled with nearest observed proxy value plus noise; never zero
         if missing_past:
